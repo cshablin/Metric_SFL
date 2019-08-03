@@ -11,7 +11,7 @@ import TFInfluence
 
 prior_p = 0.05
 
-class BarinelInfluence(Barinel):
+class BarinelInfluence(Barinel.Barinel):
 
     def __init__(self):
         super(BarinelInfluence, self).__init__()

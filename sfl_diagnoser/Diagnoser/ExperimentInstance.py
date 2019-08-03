@@ -40,16 +40,19 @@ class ExperimentInstance(object):
         self.error = error
         self.diagnoses=[]
 
+    def get_experiment_type(self):
+        return 'normal'
+
     def initials_to_DS(self):
         ds = sfl_diagnoser.Diagnoser.dynamicSpectrum.dynamicSpectrum()
-        ds.TestsComponents = copy.deepcopy([Experiment_Data().POOL[test] for test in self.initial_tests])
+        ds.TestsComponents = copy.deepcopy([Experiment_Data().POOL[test] for test in self.get_initials()])
         ds.probabilities=list(Experiment_Data().PRIORS)
-        ds.error=[self.error[test] for test in self.initial_tests]
-        ds.tests_names = list(self.initial_tests)
+        ds.error=[self.get_error()[test] for test in self.get_initials()]
+        ds.tests_names = list(self.get_initials())
         return ds
 
     def get_optionals_actions(self):
-        optionals = [x for x in Experiment_Data().POOL if x not in self.initial_tests]
+        optionals = [x for x in Experiment_Data().POOL if x not in self.get_initials()]
         return optionals
 
     def get_components_vectors(self):

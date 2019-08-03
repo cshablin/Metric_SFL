@@ -17,7 +17,7 @@ class TFInfluence(TF.TF):
         self.influence_alpha = influence_alpha
         self.influence_dict = dict()
         for test_id, test in enumerate(self.influence_matrix):
-            test_dict = dict(map(lambda c: (c, self.influence_matrix[test_id][c]), self.get_active_components()[matrix[test_id]]))
+            test_dict = dict(map(lambda c: (c, test[c]), self.get_active_components()[test_id]))
             self.influence_dict[test_id] = test_dict
 
     def maximize(self):

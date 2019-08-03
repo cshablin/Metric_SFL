@@ -20,7 +20,13 @@ class DynamicSpectrumInfluence(sfl_diagnoser.Diagnoser.dynamicSpectrum.dynamicSp
         ans.probabilities=list(self.getprobabilities())
         ans.error=list(self.geterror())
         ans.matrix = map(lambda test: map(lambda comp: 1 if comp in test else 0, range(len(self.getprobabilities()))), self.getTestsComponents())
-        ans.influence_matrix = self.influence_matrix
+        influence_matrix = []
+        for test_id, test in enumerate(self.getTestsComponents()):
+            test_data = []
+            for comp in range(len(self.getprobabilities())):
+                test_data.append(self.influence_matrix[test_id][comp] if comp in test else 0)
+            influence_matrix.append(test_data)
+        ans.influence_matrix = influence_matrix
         ans.influence_alpha = self.influence_alpha
         return ans
 

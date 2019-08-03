@@ -33,5 +33,8 @@ class Experiment_Data(object):
     def get_experiment_type(self):
         return self.experiment_type
 
+    def get_component_id(self, component_name):
+        return dict(map(lambda x: tuple(reversed(x)), self.COMPONENTS_NAMES.items())).get(component_name, None)
+
     def get_named_bugs(self):
         return map(lambda id: Experiment_Data().COMPONENTS_NAMES[id], Experiment_Data().BUGS)

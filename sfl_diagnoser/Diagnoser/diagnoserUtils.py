@@ -118,14 +118,16 @@ def read_json_planning_file(file_path):
     error = dict(map(lambda td: (td[0], td[2]), instance['tests_details']))
     components = dict(instance['components_names'])
     estimatedTestsPool = instance.get('estimatedTestsPool', {})
-    priors = instance.get('priors', [0.1 for component in components])
+    priors = instance.get('priors', [0.1 for _ in components])
     Experiment_Data().set_values(priors, instance['bugs'], testsPool, components, estimatedTestsPool)
+    print instance.items()
+    map(lambda x: setattr(Experiment_Data(), x[0], x[1]), instance.items())
     return sfl_diagnoser.Diagnoser.ExperimentInstanceFactory.ExperimentInstanceFactory.get_experiment_instance(instance['initial_tests'], error, experiment_type)
 
 
-def write_json_planning_file(out_path, bugs, tests_details, initial_tests=None, **kwargs):
+def write_json_planning_file(out_path, tests_details, bugs=None, initial_tests=None, **kwargs):
     instance = dict()
-    instance['bugs'] = bugs
+    instance['bugs'] = bugs or Experiment_Data().BUGS
     components_names = list(set(reduce(list.__add__, map(lambda details: details[1], tests_details), [])))
     instance['components_names'] = list(enumerate(components_names))
     map_component_id = dict(map(lambda x: tuple(reversed(x)), list(enumerate(components_names))))
@@ -140,3 +142,7 @@ def write_json_planning_file(out_path, bugs, tests_details, initial_tests=None, 
     instance.update(kwargs)
     with open(out_path, "wb") as f:
         json.dump(instance, f)
+
+def write_json_planning_file_by_ei(out_path, ei, **kwargs):
+    tests_details = map(lambda x: (x[0], map(Experiment_Data().COMPONENTS_NAMES.get, x[1]), ei.error[x[0]]), Experiment_Data().POOL.items())
+    write_json_planning_file(out_path, tests_details, **kwargs)
