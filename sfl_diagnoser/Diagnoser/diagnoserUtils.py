@@ -84,6 +84,11 @@ def write_planning_file(out_path,
         writer = csv.writer(f, delimiter=delimiter)
         writer.writerows(lines)
 
+def write_planning_file_by_ei(out_path, ei):
+    tests_details = map(lambda x: (x[0], map(Experiment_Data().COMPONENTS_NAMES.get, x[1]), ei.error[x[0]]),
+                        Experiment_Data().POOL.items())
+    write_planning_file(out_path, Experiment_Data().BUGS, tests_details)
+
 def write_merged_matrix(instance, out_matrix):
     componets = instance.get_components_vectors()
     similiar_componets = {}
@@ -120,7 +125,6 @@ def read_json_planning_file(file_path):
     estimatedTestsPool = instance.get('estimatedTestsPool', {})
     priors = instance.get('priors', [0.1 for _ in components])
     Experiment_Data().set_values(priors, instance['bugs'], testsPool, components, estimatedTestsPool)
-    print instance.items()
     map(lambda x: setattr(Experiment_Data(), x[0], x[1]), instance.items())
     return sfl_diagnoser.Diagnoser.ExperimentInstanceFactory.ExperimentInstanceFactory.get_experiment_instance(instance['initial_tests'], error, experiment_type)
 
