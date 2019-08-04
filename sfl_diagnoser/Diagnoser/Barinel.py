@@ -48,7 +48,11 @@ class Barinel:
             diag.probability=e_dk * dk #temporary probability
             probs_sum += diag.probability
         for diag in self.diagnoses:
-            temp_prob = diag.get_prob() / probs_sum
+            if probs_sum < 1e-3:
+                # set uniform to avoid nan
+                temp_prob = 1.0 / len(self.diagnoses)
+            else:
+                temp_prob = diag.get_prob() / probs_sum
             diag.probability=temp_prob
             new_diagnoses.append(diag)
         self.diagnoses = new_diagnoses
