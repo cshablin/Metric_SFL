@@ -40,7 +40,7 @@ class Staccato():
 
     def is_subsumed(self, diagnoses, candidate):
         for current_d in diagnoses:
-            if candidate.issubset(current_d):
+            if current_d.issubset(candidate):
                 return True
         return False
 
