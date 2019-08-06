@@ -12,15 +12,24 @@ import sfl_diagnoser.Diagnoser.ExperimentInstance
  all functions return tuple of (precision, recall, steps)
 """
 
-def main_HP(ei):
+def main_HP(ei,status):
     steps = 0
+    list_recall = []
+    list_pre = []
     ei.diagnose()
-    while not (ei.isTerminal() or ei.AllTestsReached() ):
-        ei = sfl_diagnoser.Diagnoser.ExperimentInstance.addTests(ei, ei.hp_next())
+    while not (ei.isTerminal() or ei.AllTestsReached() or len(list_recall) > 150):
+        if status == 1:
+            ei = sfl_diagnoser.Diagnoser.ExperimentInstance.addTests(ei, ei.hp_next())
+        elif status == 2:
+            ei = sfl_diagnoser.Diagnoser.ExperimentInstance.addTests(ei, ei.hp_next_by_prob())
+        elif status == 3:
+            ei = sfl_diagnoser.Diagnoser.ExperimentInstance.addTests(ei, ei.random_next())
         steps = steps + 1
-    precision, recall=ei.calc_precision_recall()
-    return precision, recall, steps, repr(ei)
+        precision, recall = ei.calc_precision_recall()
+        list_recall.append(recall)
+        list_pre.append(precision)
 
+    return list_pre, list_recall
 
 def main_Random(ei):
     steps = 0
