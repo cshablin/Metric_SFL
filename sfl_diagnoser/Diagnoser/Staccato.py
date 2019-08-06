@@ -35,19 +35,12 @@ class Staccato():
                 return False
         return True
 
-
     def join(self, diagnosis, comp):
         return sorted(list(diagnosis) + [comp])
 
-
-    def is_subsumed(self,diagnoses, candidate):
+    def is_subsumed(self, diagnoses, candidate):
         for current_d in diagnoses:
-            is_sublist = True
-            for elem in current_d:
-                if elem not in candidate:
-                    is_sublist = False
-                    break
-            if is_sublist:
+            if current_d.issubset(candidate):
                 return True
         return False
 
@@ -63,7 +56,7 @@ class Staccato():
             for comp in unstripped_comps:
                 if (self.is_in_all_conflicts(M_matrix, e_vector, comp, strip)):
                     #insert component as a single fault diagnosis
-                    diagnoses.append([comp])
+                    diagnoses.append({comp})
                     #"remove" this component from matrix
                     strip.strip_comp(comp)
         #generate rest of diagnoses
@@ -83,9 +76,9 @@ class Staccato():
                 break
             #scan "tag" diagnoses
             for tag_diag in diagnoses_tag:
-                temp_d = self.join(tag_diag,j)
-                if (not self.is_subsumed(diagnoses, temp_d)):
-                    diagnoses.append(temp_d)
+                tag_diag.add(j)
+                if (not self.is_subsumed(diagnoses, tag_diag)):
+                    diagnoses.append(tag_diag)
             #end inner loop
             i=i+1
         #end outer loop

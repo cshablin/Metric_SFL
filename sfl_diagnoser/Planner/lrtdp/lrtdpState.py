@@ -2,7 +2,7 @@ __author__ = 'amir'
 import random
 
 import LRTDPModule
-import SFL_diagnoser.Diagnoser.ExperimentInstance
+import sfl_diagnoser.Diagnoser.ExperimentInstance
 
 
 class LrtdpState(object):
@@ -27,7 +27,7 @@ class LrtdpState(object):
 
     # do action and return observation
     def addTest(self,ind):
-        return SFL_diagnoser.Diagnoser.ExperimentInstance.addTests(self.experimentInstance, ind)
+        return sfl_diagnoser.Diagnoser.ExperimentInstance.addTests(self.experimentInstance, ind)
 
     def greedyAction(self, treshold = 1):
         return random.choice(self.getGreedyActions(treshold))

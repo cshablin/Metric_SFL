@@ -18,6 +18,12 @@ class Diagnosis_Results(object):
         for key, value in self.metrics.items():
             setattr(self, key, value)
 
+    @staticmethod
+    def diagnosis_results_from_experiment_instance(experiment_instance):
+        return Diagnosis_Results(experiment_instance.diagnoses,
+                                 experiment_instance.initial_tests,
+                                 experiment_instance.error)
+
     def _calculate_metrics(self):
         """
         calc result for the given experiment instance
@@ -141,10 +147,13 @@ class Diagnosis_Results(object):
 
     def calc_top_k(self):
         components = map(lambda x: x[0], self.get_components_probabilities())
-        top_k = float('inf')
+        top_k = None
         for bug in self.get_bugs():
             if bug in components:
-                top_k = min(top_k, components.index(bug))
+                if top_k:
+                    top_k = max(top_k, components.index(bug))
+                else:
+                    top_k = components.index(bug)
         return top_k + 1
 
     def calc_entropy(self):

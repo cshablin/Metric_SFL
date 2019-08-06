@@ -24,29 +24,17 @@ class FullMatrix(object):
     # return: optimized FullMatrix, chosen_components( indices)
     @staticmethod
     def optimize_FullMatrix(fullMatrix):
-        chosen = FullMatrix.get_used_comps(fullMatrix)
-        optimizedMatrix=FullMatrix()
-        optimizedMatrix.probabilities = map(lambda c: fullMatrix.probabilities[c], chosen)
-        newErr=[]
-        newMatrix=[]
-        for test,err in zip(fullMatrix.matrix,fullMatrix.error):
-            new_test = map(lambda c: test[c], chosen)
-            if any(new_test): ## optimization could remove all comps of a test
-                newMatrix.append(new_test)
-                newErr.append(err)
-        optimizedMatrix.matrix=newMatrix
-        optimizedMatrix.error=newErr
-        return optimizedMatrix, sorted(chosen)
-
-    @staticmethod
-    def get_used_comps(fullMatrix):
-        chosen = []
-        UnusedComps = range(len(fullMatrix.probabilities))
+        failed_tests = map(lambda test: list(enumerate(test[0])), filter(lambda test: test[1] == 1, zip(fullMatrix.matrix, fullMatrix.error)))
+        used_components = reduce(set.__or__, map(lambda test: set(map(lambda comp: comp[0], filter(lambda comp: comp[1] == 1, test))), failed_tests), set())
+        optimizedMatrix = FullMatrix()
+        optimizedMatrix.probabilities = [x[1] for x in enumerate(fullMatrix.probabilities) if x[0] in used_components]
+        newErr = []
+        newMatrix = []
         for test, err in zip(fullMatrix.matrix, fullMatrix.error):
-            if err == 0:
-                continue
-            for comp in list(UnusedComps):
-                if test[comp] == 1:
-                    chosen.append(comp)
-                    UnusedComps.remove(comp)
-        return chosen
+            newTest = [x[1] for x in enumerate(test) if x[0] in used_components]
+            if 1 in newTest: ## optimization could remove all comps of a test
+                newMatrix.append(newTest)
+                newErr.append(err)
+        optimizedMatrix.matrix = newMatrix
+        optimizedMatrix.error = newErr
+        return optimizedMatrix, sorted(used_components)

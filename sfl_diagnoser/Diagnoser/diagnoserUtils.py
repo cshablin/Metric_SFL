@@ -22,7 +22,7 @@ def readMatrixWithProbabilitiesFile(fileName):
     ans.error=error
     return ans
 
-def readPlanningFile(fileName):
+def readPlanningFile(fileName, delimiter=";"):
     lines=open(fileName,"r").readlines()
     lines=[x.replace("\n","") for x in lines]
     sections=["[Description]", "[Components names]", "[Priors]","[Bugs]","[InitialTests]","[TestDetails]"]
@@ -31,17 +31,20 @@ def readPlanningFile(fileName):
     priors=eval(priorsStr[0])
     bugs=eval(BugsStr[0])
     initials=eval(InitialsStr[0])
-    components = dict(eval(components_names[0]))
+    try:
+        components = dict(map(lambda x: x if isinstance(x, tuple) else eval(x), eval(components_names[0].replace(delimiter, ','))))
+    except:
+        components = dict(eval(eval(components_names[0].replace(delimiter, ','))))
     testsPool={}
     estimatedTestsPool = {}
     error={}
     for td in TestDetailsStr:
-        tup = tuple(td.split(";"))
+        tup = tuple(td.split(delimiter))
         ind, actualTrace, err = None, None, None
         if len(tup) == 3:
-            ind, actualTrace, err = tuple(td.split(";"))
+            ind, actualTrace, err = tuple(td.split(delimiter))
         if len(tup) == 4:
-            ind, actualTrace, estimatedTrace, err = tuple(td.split(";"))
+            ind, actualTrace, estimatedTrace, err = tuple(td.split(delimiter))
             estimatedTestsPool[ind] = eval(estimatedTrace)
         actualTrace=eval(actualTrace)
         err=int(err)
@@ -109,7 +112,8 @@ def write_planning_file(out_path,
                         tests_details,
                         description="default description",
                         priors=None,
-                        initial_tests=None):
+                        initial_tests=None,
+                        delimiter=";"):
     """
     write a matrix to out path
     :param out_path: destination path to write the matrix
@@ -137,13 +141,13 @@ def write_planning_file(out_path,
         initial_tests = map(lambda details: details[0], tests_details)
     bugged_components = [map_component_id[component] for component in filter(lambda c: any(map(lambda b: b in c, bugs)),components_names)]
     lines = [["[Description]"]] + [[description]]
-    lines += [["[Components names]"]] + [[list(enumerate(components_names))]]
+    lines += [["[Components names]"]] + [list(enumerate(components_names))]
     lines += [["[Priors]"]] + [[[priors[component] for component in components_names]]]
     lines += [["[Bugs]"]] + [[bugged_components]]
     lines += [["[InitialTests]"]] + [[initial_tests]]
     lines += [["[TestDetails]"]] + full_tests_details
     with open(out_path, 'wb') as f:
-        writer = csv.writer(f, delimiter=";")
+        writer = csv.writer(f, delimiter=delimiter)
         writer.writerows(lines)
 
 def write_merged_matrix(instance, out_matrix):

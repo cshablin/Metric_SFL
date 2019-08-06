@@ -48,7 +48,11 @@ class Barinel:
             diag.probability=e_dk * dk #temporary probability
             probs_sum += diag.probability
         for diag in self.diagnoses:
-            temp_prob = diag.get_prob() / probs_sum
+            if probs_sum < 1e-3:
+                # set uniform to avoid nan
+                temp_prob = 1.0 / len(self.diagnoses)
+            else:
+                temp_prob = diag.get_prob() / probs_sum
             diag.probability=temp_prob
             new_diagnoses.append(diag)
         self.diagnoses = new_diagnoses
@@ -58,10 +62,8 @@ class Barinel:
         #initialize
         self.diagnoses = []
         diags = Staccato.Staccato().run(self.M_matrix, self.e_vector)
-        for  diag in diags:
-            d= Diagnosis.Diagnosis()
-            d.diagnosis=diag
-            self.diagnoses.append(d)
+        for diag in diags:
+            self.diagnoses.append(Diagnosis.Diagnosis(diag))
         #generate probabilities
         self.generate_probs()
 

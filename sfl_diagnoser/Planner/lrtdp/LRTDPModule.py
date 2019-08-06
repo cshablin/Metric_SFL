@@ -2,8 +2,8 @@ __author__ = 'amir'
 
 import time
 
-import SFL_diagnoser.Diagnoser.ExperimentInstance
-import SFL_diagnoser.Planner.lrtdp.lrtdpState
+import sfl_diagnoser.Diagnoser.ExperimentInstance
+import sfl_diagnoser.Planner.lrtdp.lrtdpState
 
 states={}
 epsilon=0
@@ -28,7 +28,7 @@ def generateState(ei):
     global states
     key=repr(ei)
     if key not in states:
-        state = SFL_diagnoser.Planner.lrtdp.lrtdpState.LrtdpState(ei, approach)
+        state = sfl_diagnoser.Planner.lrtdp.lrtdpState.LrtdpState(ei, approach)
         states[key]= state
     return states[key]
 
@@ -60,7 +60,7 @@ def lrtdp():
         steps += 1
         action = state.greedyAction()
         print "action, time:", action, time.time()
-        ei = SFL_diagnoser.Diagnoser.ExperimentInstance.addTests(state.experimentInstance, action)
+        ei = sfl_diagnoser.Diagnoser.ExperimentInstance.addTests(state.experimentInstance, action)
         state = generateState(ei)
     precision, recall = state.experimentInstance.calc_precision_recall()
     return precision, recall, steps, repr(state)
@@ -114,7 +114,7 @@ def evaluatePolicy():
     ei=state.experimentInstance
     while (not state.isSolved) and (not state.terminal_or_allReach()):
         action = state.greedyAction()
-        ei = SFL_diagnoser.Diagnoser.ExperimentInstance.addTests(ei, action)
+        ei = sfl_diagnoser.Diagnoser.ExperimentInstance.addTests(ei, action)
         state = generateState(ei)
         steps = steps + 1
     precision, recall = ei.calc_precision_recall()
@@ -138,7 +138,7 @@ def multiLrtdp():
         if not success:
             return
         a=state.greedyAction()
-        ei = SFL_diagnoser.Diagnoser.ExperimentInstance.addTests(ei, a)
+        ei = sfl_diagnoser.Diagnoser.ExperimentInstance.addTests(ei, a)
         state=generateState(ei)
         steps=steps+1
     precision, recall=ei.calc_precision_recall()

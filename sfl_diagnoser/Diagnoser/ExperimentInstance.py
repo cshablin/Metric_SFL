@@ -281,8 +281,7 @@ class ExperimentInstance:
         self.diagnose()
         named_diagnoses = []
         for diagnosis in self.diagnoses:
-            named = Diagnosis.Diagnosis()
-            named.diagnosis = map(lambda id: Experiment_Data().COMPONENTS_NAMES[id], diagnosis.diagnosis)
+            named = Diagnosis.Diagnosis(map(lambda id: Experiment_Data().COMPONENTS_NAMES[id], diagnosis.diagnosis))
             named.probability = diagnosis.probability
             named_diagnoses.append(named)
         return named_diagnoses

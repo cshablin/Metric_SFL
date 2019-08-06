@@ -46,11 +46,8 @@ class TF(object):
                                                    map(h_dict.get, self.active_components[v]), 1.0))
         return reduce(operator.mul, map(functools.partial(apply, test_prob), self.activity), 1.0)
 
-    def probabilty_TF(self,h):
-        h_dict={}
-        for comp,h_score in zip(self.diagnosis,h):
-            h_dict[comp]=h_score
-        return -self.probabilty(h_dict)
+    def probabilty_TF(self, h):
+        return -self.probabilty(dict(zip(self.diagnosis, h)))
 
     def not_saved(self):
         pass
@@ -59,8 +56,8 @@ class TF(object):
         if self.max_value == None:
             self.not_saved()
             initialGuess=[0.1 for _ in self.diagnosis]
-            lb=[0 for _ in self.diagnosis]
-            ub=[1 for _ in self.diagnosis]
+            lb = [0 for _ in self.diagnosis]
+            ub = [1 for _ in self.diagnosis]
             import scipy.optimize
             self.max_value = -scipy.optimize.minimize(self.probabilty_TF,initialGuess,method="L-BFGS-B"
                                         ,bounds=zip(lb,ub), tol=1e-2,options={'maxiter':10}).fun

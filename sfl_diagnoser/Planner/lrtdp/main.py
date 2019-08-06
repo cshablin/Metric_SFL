@@ -22,13 +22,13 @@ def mainModule(ei):
 def run_file(f):
     print "STACK" , STACK
     print "TRIALS" , TRIALS
-    instance = SFL_diagnoser.Diagnoser.diagnoserUtils.readPlanningFile(f)
+    instance = sfl_diagnoser.Diagnoser.diagnoserUtils.readPlanningFile(f)
     return mainModule(instance)
 
 if __name__=="__main__":
 
     file="C:\\projs\\lrtdp\\instances\\40_uniform_0.txt"
-    instance = SFL_diagnoser.Diagnoser.diagnoserUtils.readPlanningFile(file)
+    instance = sfl_diagnoser.Diagnoser.diagnoserUtils.readPlanningFile(file)
     print instance.calc_precision_recall() ,len(instance.initial_tests)
     print run_file(file)
     #
