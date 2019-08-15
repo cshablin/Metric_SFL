@@ -23,7 +23,7 @@ class TFInfluence(TF.TF):
     def maximize(self):
         max_value = super(TFInfluence, self).maximize()
         influence_probability = self.probabilty(self.influence_dict)
-        return max_value * self.influence_alpha + influence_probability * (1- self.influence_alpha)
+        return max_value * self.influence_alpha + influence_probability * (1 - self.influence_alpha)
 
     def calculate(self, values):
         return self.probabilty(values)

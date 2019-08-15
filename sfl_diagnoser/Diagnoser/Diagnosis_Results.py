@@ -1,6 +1,8 @@
 from sfl_diagnoser.Diagnoser.Experiment_Data import Experiment_Data
 from sfl_diagnoser.Diagnoser.Ochiai_Rank import Ochiai_Rank
 from scipy.stats import entropy
+from collections import Counter
+
 
 class Diagnosis_Results(object):
     def __init__(self, diagnoses, initial_tests, error, pool=None, bugs=None):
@@ -12,8 +14,12 @@ class Diagnosis_Results(object):
             self.pool = Experiment_Data().POOL
         self.bugs = bugs
         if bugs == None:
-            self.bugs = Experiment_Data().BUGS
-        self.components = set(reduce(list.__add__ , map(lambda test: test[1], filter(lambda test: test[0] in self.initial_tests, self.pool.items())), []))
+            experiment_data_bugs = Experiment_Data().BUGS
+            if isinstance(experiment_data_bugs[0], int):
+                self.bugs = experiment_data_bugs
+            else:
+                self.bugs = Experiment_Data().get_id_bugs()
+        self.components = set(reduce(list.__add__, map(self.pool.get, self.initial_tests), []))
         self.metrics = self._calculate_metrics()
         for key, value in self.metrics.items():
             setattr(self, key, value)
@@ -37,6 +43,8 @@ class Diagnosis_Results(object):
         metrics["entropy"] = self.calc_entropy()
         metrics["component_entropy"] = self.calc_component_entropy()
         metrics["num_comps"] = len(self.get_components())
+        metrics["num_diagnoses"] = len(self.diagnoses)
+        metrics["distinct_diagnoses_scores"] = len(Counter(map(lambda x: x.probability, self.diagnoses)))
         metrics["num_tests"] = len(self.get_tests())
         metrics["num_distinct_traces"] = len(self.get_distinct_traces())
         metrics["num_failed_tests"] = len(self._get_tests_by_error(1))
@@ -48,7 +56,7 @@ class Diagnosis_Results(object):
         metrics["num_bugs"] = len(self.get_bugs())
         metrics["wasted"] = self.calc_wasted_components()
         metrics["top_k"] = self.calc_top_k()
-        metrics["ochiai"] = self.calc_ochiai_values()
+        # metrics["ochiai"] = self.calc_ochiai_values()
         return metrics
 
     def _get_metrics_list(self):
@@ -103,12 +111,11 @@ class Diagnosis_Results(object):
         return self.bugs
 
     def get_initial_tests_traces(self):
-        return map(lambda test: (sorted(test[1]), self.error[test[0]]),
-            filter(lambda test: test[0] in self.initial_tests, self.pool.items()))
+        return map(lambda test: (sorted(self.pool[test]), self.error[test]), self.initial_tests)
 
     def _get_tests_by_error(self, error):
-        tests = filter(lambda test: test[0] in self.initial_tests, self.pool.items())
-        return dict(filter(lambda test: self.error[test[0]] == error, tests))
+        by_error = filter(lambda test: self.error[test] == error, self.initial_tests)
+        return dict(map(lambda test: (test, self.pool[test]), by_error))
 
     def get_components(self):
         return set(reduce(list.__add__, self.pool.values()))
@@ -135,13 +142,13 @@ class Diagnosis_Results(object):
         return sorted(compsProbs.items(), key=lambda x: x[1], reverse=True)
 
     def calc_wasted_components(self):
-        if len(self.get_bugs()) == 0:
-            return float('inf')
         components = map(lambda x: x[0], self.get_components_probabilities())
+        if len(self.get_bugs()) == 0:
+            return len(components)
         wasted = 0.0
         for b in self.get_bugs():
             if b not in components:
-                return float('inf')
+                return len(components)
             wasted += components.index(b)
         return wasted / len(self.get_bugs())
 
@@ -150,11 +157,8 @@ class Diagnosis_Results(object):
         top_k = None
         for bug in self.get_bugs():
             if bug in components:
-                if top_k:
-                    top_k = max(top_k, components.index(bug))
-                else:
-                    top_k = components.index(bug)
-        return top_k + 1
+                top_k = max(top_k, components.index(bug))
+        return top_k or len(components)
 
     def calc_entropy(self):
         return entropy(map(lambda diag: diag.probability, self.diagnoses))

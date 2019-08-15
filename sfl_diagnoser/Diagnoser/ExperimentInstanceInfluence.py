@@ -23,6 +23,8 @@ class ExperimentInstanceInfluence(sfl_diagnoser.Diagnoser.ExperimentInstance.Exp
         assert len(Experiment_Data().influence_matrix.keys()) == len(tests) , "different number of tests in influence matrix"
         assert sorted(Experiment_Data().influence_matrix.keys()) == sorted(tests) , "different tests in influence matrix"
         for test in tests:
+            assert len(set(Experiment_Data().POOL[test])) == len(Experiment_Data().POOL[test]), \
+                "trace of test {0} is faulty".format(test)
             assert len(Experiment_Data().influence_matrix[test]) == len(Experiment_Data().POOL[test]), \
                 "influence of test {0} is faulty".format(test)
             assert all(map(lambda c: 0.0 <= c <= 1.0, Experiment_Data().influence_matrix[test].values())), \

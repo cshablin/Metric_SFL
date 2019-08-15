@@ -105,6 +105,7 @@ def write_merged_matrix(instance, out_matrix):
     new_pool = map(lambda test: [test, list(set(map(get_name, Experiment_Data().POOL[test]))), instance.error[test]], Experiment_Data().POOL)
     write_planning_file(out_matrix, new_bugs, new_pool)
 
+
 def save_ds_to_matrix_file(ds, out_file):
     tests_details = map(lambda details: (
     str(details[0]), map(lambda c: Experiment_Data().COMPONENTS_NAMES[c], details[1]), details[2]),
@@ -113,8 +114,12 @@ def save_ds_to_matrix_file(ds, out_file):
 
 
 def read_json_planning_file(file_path):
-    with open(file_path) as f:
+    with open(file_path, "r") as f:
         instance = json.loads(f.read())
+    return read_json_planning_instance(instance)
+
+
+def read_json_planning_instance(instance):
     assert 'bugs' in instance,"bugs are not defined in planning_file"
     assert 'tests_details' in instance,"tests_details are not defined in planning_file"
     assert 'initial_tests' in instance,"initial_tests are not defined in planning_file"
@@ -138,7 +143,7 @@ def write_json_planning_file(out_path, tests_details, bugs=None, initial_tests=N
     full_tests_details = []
     for name, trace, outcome in tests_details:
         full_tests_details.append(
-            (name, sorted(map(lambda comp: map_component_id[comp], trace), key=lambda x: x), outcome))
+            (name, sorted(set(map(lambda comp: map_component_id[comp], trace)), key=lambda x: x), outcome))
     instance['tests_details'] = full_tests_details
     if initial_tests is None:
         initial_tests = map(lambda details: details[0], full_tests_details)
