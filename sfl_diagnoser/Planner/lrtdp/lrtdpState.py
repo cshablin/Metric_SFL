@@ -6,7 +6,7 @@ import sfl_diagnoser.Diagnoser.ExperimentInstance
 
 
 class LrtdpState(object):
-    def __init__(self,experimentInstance, approach):
+    def __init__(self, experimentInstance, approach):
         """
         experimentInstance - the instance of this state
         approach - how to combine tests probabilities to qvalue.

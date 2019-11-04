@@ -9,7 +9,7 @@ import time
 from threading import Thread
 from numpy.random import choice
 
-import Planner.lrtdp.LRTDPModule
+import Planner.lrtdp.LRTDPModule.Lrtdp
 import Planner.mcts.main
 import Planner.pomcp.main
 from sfl_diagnoser.Planner.mcts.mcts import mcts_uct, clear_states
@@ -128,16 +128,30 @@ class HPPlanner(AbstractPlanner):
 
 
 class LRTDPPlanner(AbstractPlanner):
-    # def __init__(self):
-    #     pass
+    def __init__(self, approach="uniform", iterations=1, greedy_action_treshold=1, epsilon=0.001):
+        super(LRTDPPlanner, self).__init__()
+        self.approach = approach
+        self.iterations = iterations
+        self.greedy_action_treshold = greedy_action_treshold
+        self.epsilon = epsilon
+
+    def plan(self, ei):
+        sfl_diagnoser.Planner.lrtdp.LRTDPModule.Lrtdp.clear_states()
+        super(LRTDPPlanner, self).plan(ei)
 
     def _plan(self, ei):
-        pass
+        return sfl_diagnoser.Planner.lrtdp.LRTDPModule.Lrtdp(ei, epsilon=self.epsilon, iterations=self.iterations,
+                                                             greedy_action_treshold=self.greedy_action_treshold, approach=self.approach)
 
 
 class EntropyPlanner(AbstractPlanner):
+    def __init__(self, threshold = 1.2, batch=1):
+        super(EntropyPlanner, self).__init__()
+        self.threshold = threshold
+        self.batch = batch
+
     def _plan(self, ei):
-        return ei.entropy_next()
+        return ei.entropy_next(self.threshold, self.batch)
 
 
 class ALLTestsPlanner(AbstractPlanner):
@@ -159,7 +173,9 @@ class PlannerExperiment(object):
     def get_planners():
         return [InitialsPlanner(), ALLTestsPlanner(), AbstractPlanner(), HPPlanner(), EntropyPlanner()] + \
                map(lambda x: MCTSPlanner("entropy", x), range(1, 20)) + map(lambda x: MCTSPlanner("entropy", x * 10), range(1, 20)) + \
-               map(lambda x: MCTSPlanner("hp", x), range(1, 20)) + map(lambda x: MCTSPlanner("hp", x*10), range(1, 20))
+               map(lambda x: MCTSPlanner("hp", x), range(1, 20)) + map(lambda x: MCTSPlanner("hp", x*10), range(1, 20))+ \
+               map(lambda x: LRTDPPlanner("entropy", x), range(1, 20)) + map(lambda x: LRTDPPlanner("entropy", x * 10), range(1, 20)) + \
+               map(lambda x: LRTDPPlanner("hp", x), range(1, 20)) + map(lambda x: LRTDPPlanner("hp", x*10), range(1, 20))
 
 
     def get_results(self):
