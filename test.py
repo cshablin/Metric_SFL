@@ -6,7 +6,7 @@ from sfl_diagnoser.Diagnoser.diagnoserUtils import readPlanningFile, \
     write_json_planning_file, \
     write_json_planning_file_by_ei, read_json_planning_file
 
-ei = read_json_planning_file(r"c:\temp\matrix.json")
+ei = read_json_planning_file(r"C:\amirelm\component_importnace\data\maven_1\matrices\5727_ce6f0bfd")
 ei.diagnose()
 print ei.diagnoses
 exit()
@@ -70,8 +70,6 @@ if __name__ == "__main__":
     # results.get_metrics_values()
     # print results
     # exit()
-    # ei = sfl_diagnoser.Diagnoser.ExperimentInstance.addTests(inst, inst.hp_next())
-    #
     # # check_influence()
     # # exit()
     # base = readPlanningFile(r"C:\Users\User\Downloads\MatrixFile4.txt")

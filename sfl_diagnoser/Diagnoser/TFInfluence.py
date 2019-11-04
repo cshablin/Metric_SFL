@@ -6,9 +6,6 @@ import operator
 import functools
 import TF
 
-instances = []
-calls = 0
-
 
 class TFInfluence(TF.TF):
     def __init__(self, matrix, error, diagnosis, influence_matrix, influence_alpha):

@@ -32,6 +32,7 @@ class Experiment_Data(object):
         self.ESTIMATED_POOL = extimated_pool_arg
         self.experiment_type = experiment_type
         map(lambda attr: setattr(self, attr, kwargs[attr]), kwargs)
+        assert None not in map(self.get_component_id, self.BUGS)
 
     def get_experiment_type(self):
         return self.experiment_type
@@ -43,4 +44,5 @@ class Experiment_Data(object):
         return map(self.COMPONENTS_NAMES.get, self.BUGS)
 
     def get_id_bugs(self):
-        return map(self.get_component_id, self.BUGS)
+        ret_value = map(self.get_component_id, self.BUGS)
+        return ret_value

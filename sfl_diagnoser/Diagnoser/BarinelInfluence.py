@@ -9,8 +9,6 @@ import Diagnosis
 import Staccato
 import TFInfluence
 
-prior_p = 0.05
-
 class BarinelInfluence(Barinel.Barinel):
 
     def __init__(self):

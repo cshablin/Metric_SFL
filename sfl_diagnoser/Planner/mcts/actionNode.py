@@ -9,8 +9,8 @@ class ActionNode(object):
         self.action = action
         self.parent = parent
         self.approach = approach
-        self.pass_probability = self.parent.experimentInstance.compute_pass_prob(self.action)
-        next_ei = self.parent.experimentInstance.next_state_distribution(self.action)
+        self.pass_probability = self.parent.experiment_instance.compute_pass_prob(self.action)
+        next_ei = self.parent.experiment_instance.next_state_distribution(self.action)
         self.f_ei = next_ei[0][0]
         self.p_ei = next_ei[1][0]
         self.f_child = None
@@ -70,4 +70,4 @@ class ActionNode(object):
             return self.f_child
 
     def fully_expanded(self):
-        return None is [self.p_child ,self.f_child]
+        return not (self.p_child is None and self.f_child is None)

@@ -2,6 +2,7 @@ from sfl_diagnoser.Diagnoser.Experiment_Data import Experiment_Data
 from sfl_diagnoser.Diagnoser.Ochiai_Rank import Ochiai_Rank
 from scipy.stats import entropy
 from collections import Counter
+import numpy as np
 
 
 class Diagnosis_Results(object):
@@ -10,10 +11,10 @@ class Diagnosis_Results(object):
         self.initial_tests = initial_tests
         self.error = error
         self.pool = pool
-        if pool == None:
+        if pool is None:
             self.pool = Experiment_Data().POOL
         self.bugs = bugs
-        if bugs == None:
+        if bugs is None:
             experiment_data_bugs = Experiment_Data().BUGS
             if isinstance(experiment_data_bugs[0], int):
                 self.bugs = experiment_data_bugs
@@ -48,6 +49,7 @@ class Diagnosis_Results(object):
         metrics["num_tests"] = len(self.get_tests())
         metrics["num_distinct_traces"] = len(self.get_distinct_traces())
         metrics["num_failed_tests"] = len(self._get_tests_by_error(1))
+        metrics["num_passed_tests"] = len(self._get_tests_by_error(0))
         passed_comps = set(self._get_components_by_error(0))
         failed_comps = set(self.get_components_in_failed_tests())
         metrics["num_failed_comps"] = len(failed_comps)
@@ -56,8 +58,45 @@ class Diagnosis_Results(object):
         metrics["num_bugs"] = len(self.get_bugs())
         metrics["wasted"] = self.calc_wasted_components()
         metrics["top_k"] = self.calc_top_k()
+        metrics["num_comps_in_diagnoses"] = len(self._get_comps_in_diagnoses())
+        metrics["bugs_cover_ratio"] = self._get_bugs_cover_ratio()
+        metrics["average_trace_size"] = self._get_average_trace_size()
+        metrics["average_component_activity"] = self._get_average_component_activity()
+        metrics["average_diagnosis_size"] = self._get_average_diagnosis_size()
+        metrics["bugs_scores_average"], metrics["bugs_scores_std"], metrics["bugs_scores_entropy"] = self._get_bugs_scores()
+        metrics["non_bugs_scores_average"], metrics["non_bugs_scores_std"], metrics["non_bugs_scores_entropy"] = self._get_non_bugs_scores()
+        metrics.update(self.cardinality())
         # metrics["ochiai"] = self.calc_ochiai_values()
         return metrics
+
+    def _get_comps_in_diagnoses(self):
+        return reduce(set.__or__, map(lambda x: set(x.diagnosis), self.diagnoses), set())
+
+    def _get_bugs_cover_ratio(self):
+        bugs = self.get_bugs()
+        comps = self._get_comps_in_diagnoses()
+        return len(set(comps) & set(bugs)) / (len(bugs) * 1.0)
+
+    def _get_bugs_scores(self):
+        bugs = self.get_bugs()
+        comps_prob = dict(self.get_components_probabilities())
+        bugs_prob = map(lambda x: comps_prob.get(x, 0), bugs)
+        return np.mean(bugs_prob), np.std(bugs_prob), entropy(bugs_prob)
+
+    def _get_average_trace_size(self):
+        return np.mean(map(len, self.pool.values()))
+
+    def _get_average_diagnosis_size(self):
+        return np.mean(map(lambda x: len(x.diagnosis), self.diagnoses))
+
+    def _get_average_component_activity(self):
+        return np.mean(Counter(reduce(list.__add__, self.pool.values(), [])).values())
+
+    def _get_non_bugs_scores(self):
+        bugs = self.get_bugs()
+        comps_prob = dict(self.get_components_probabilities())
+        non_bugs_prob = map(comps_prob.get, filter(lambda c: c not in bugs, comps_prob))
+        return np.mean(non_bugs_prob), np.std(non_bugs_prob), entropy(non_bugs_prob)
 
     def _get_metrics_list(self):
         return sorted(self.metrics.items(), key=lambda m:m[0])
@@ -182,3 +221,8 @@ class Diagnosis_Results(object):
             for component in self.components:
                     ochiai[component].advance_counter(1 if component in trace else 0, error)
         return ochiai
+
+    def cardinality(self):
+        import pandas as pd
+        d = pd.DataFrame(map(lambda d: len(d.diagnosis), self.diagnoses)).describe()
+        return dict(map(lambda x: ("cardinality" + x, d.loc[x][0]), d.index.values))

@@ -9,7 +9,7 @@ class Diagnosis:
         self.probability = 0.0
 
     def clone(self):
-        res=Diagnosis()
+        res = Diagnosis()
         res.diagnosis = list(self.diagnosis)
         res.probability = self.get_prob()
         return res

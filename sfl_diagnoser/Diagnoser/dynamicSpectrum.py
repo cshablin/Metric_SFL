@@ -34,11 +34,14 @@ class dynamicSpectrum(object):
         self.error = error
 
     def convertToFullMatrix(self):
-        ans=FullMatrix()
+        ans = self._create_full_matrix()
         ans.set_probabilities(list(self.getprobabilities()))
         ans.set_error(list(self.geterror()))
         ans.set_matrix(map(lambda test: map(lambda comp: 1 if comp in test else 0, range(len(self.getprobabilities()))), self.getTestsComponents()))
         return ans
+
+    def _create_full_matrix(self):
+        return FullMatrix()
 
     def remove_duplicate_tests(self):
         distinct_tests = set(map(str, zip(self.getTestsComponents(), self.geterror())))

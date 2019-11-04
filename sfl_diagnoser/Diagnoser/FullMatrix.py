@@ -8,14 +8,17 @@ class FullMatrix(object):
         self.error=[]
 
     def diagnose(self):
-        bar= Barinel.Barinel()
+        bar = self._create_barinel()
         bar.set_matrix_error(self.matrix,self.error)
         bar.set_prior_probs(self.probabilities)
         return bar.run()
 
+    def _create_barinel(self):
+        return Barinel.Barinel()
+
     def save_to_csv_file(self, out_file):
         import csv
-        lines = [self.probabilities] + map(lambda x : x[0] + [x[1]] ,zip(self.matrix, self.error))
+        lines = [self.probabilities] + map(lambda x: x[0] + [x[1]], zip(self.matrix, self.error))
         with open(out_file, "wb") as f:
             writer = csv.writer(f)
             writer.writerows(lines)
@@ -34,7 +37,7 @@ class FullMatrix(object):
     def optimize(self):
         failed_tests = map(lambda test: list(enumerate(test[0])), filter(lambda test: test[1] == 1, zip(self.matrix, self.error)))
         used_components = dict(enumerate(sorted(reduce(set.__or__, map(lambda test: set(map(lambda comp: comp[0], filter(lambda comp: comp[1] == 1, test))), failed_tests), set()))))
-        optimizedMatrix = FullMatrix()
+        optimizedMatrix = self._create_full_matirx()
         optimizedMatrix.set_probabilities([x[1] for x in enumerate(self.probabilities) if x[0] in used_components])
         newErr = []
         newMatrix = []
@@ -48,3 +51,6 @@ class FullMatrix(object):
         optimizedMatrix.set_matrix(newMatrix)
         optimizedMatrix.set_error(newErr)
         return optimizedMatrix, used_components, sorted(used_tests)
+
+    def _create_full_matirx(self):
+        return FullMatrix()

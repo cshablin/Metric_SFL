@@ -4,32 +4,8 @@ from pyswarm import pso
 from LightPSO import LightPSO
 import operator
 import functools
+from collections import Counter
 
-instances = []
-calls = 0
-
-def add(tf):
-    global instances, calls
-    calls += 1
-    len_d = len(tf.diagnosis)
-    func = []
-    h = [1 for _ in tf.diagnosis]
-    step = 1.0 / (11 * len_d)
-    func.append((h, tf.probabilty_TF(h)))
-    for i in range(len_d * 10):
-        h = [1 - (i * step) for _ in tf.diagnosis]
-        func.append((h, tf.probabilty_TF(h)))
-    for instance in filter(lambda inst: len_d == len(inst.diagnosis), instances):
-        equals = True
-        for h,val in func:
-            if instance.probabilty_TF(h) != val:
-                equals = False
-                break
-        if equals:
-            tf.max_value = instance.max_value
-            return
-    tf.maximize()
-    instances.append(tf)
 
 class TF(object):
     def __init__(self, matrix, error, diagnosis):
@@ -37,7 +13,6 @@ class TF(object):
         self.diagnosis = diagnosis
         self.active_components = dict(map(lambda a: (a[0], filter(functools.partial(tuple.__getitem__, a[1]), self.diagnosis)), self.activity))
         self.max_value = None
-        # add(self)
 
     def get_active_components(self):
         return self.active_components
@@ -58,7 +33,7 @@ class TF(object):
         # h_dict is dict of dicts for test to comps
         def test_prob(test_id, v, e):
             # if e==0 : h1*h2*h3..., if e==1: 1-h1*h2*h3...
-            return e + ((-2.0 * e + 1.0 ) * reduce(operator.mul,
+            return e + ((-2.0 * e + 1.0) * reduce(operator.mul,
                                                    map(h_dict[test_id].get, self.get_active_components()[test_id]), 1.0))
         return reduce(operator.mul, map(functools.partial(apply, test_prob), self.get_activity()), 1.0)
 
@@ -70,7 +45,7 @@ class TF(object):
         pass
 
     def maximize(self):
-        if self.max_value == None:
+        if self.max_value is None:
             self.not_saved()
             initialGuess=[0.1 for _ in self.get_diagnosis()]
             lb = [0 for _ in self.get_diagnosis()]
@@ -86,6 +61,7 @@ class TF(object):
             #                             ,bounds=zip(lb,ub), tol=1e-2,options={'maxiter':10}).fun
             # self.max_value = self.maximize_by_gradient()
             # self.max_value = -pso(self.probabilty_TF, lb, ub, minfunc=1e-3, minstep=1e-3, swarmsize=20,maxiter=10)[1]
+            # print "size", len(initialGuess)
             # self.max_value = -self.probabilty_TF(initialGuess)
             # self.max_value = -LightPSO(len(self.diagnosis), self).run()
         return self.max_value
