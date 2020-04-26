@@ -1,7 +1,7 @@
 __author__ = 'amir'
 
-from pyswarm import pso
-from LightPSO import LightPSO
+#from pyswarm import pso
+#from LightPSO import LightPSO
 import operator
 import functools
 
