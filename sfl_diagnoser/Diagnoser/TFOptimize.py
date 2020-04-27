@@ -34,7 +34,7 @@ class TfMemoize(object):
         return helper
 
 
-memoize = TfMemoize()
+#memoize = TfMemoize()
 
 
 class TFOptimize(TF.TF):
@@ -58,6 +58,6 @@ class TFOptimize(TF.TF):
         return ".".join(["-".join(map(lambda x: str(Counter(s_passed).get(x, 0)), range1)),
                          "-".join(map(lambda x: str(Counter(s_failed).get(x, 0)), range1))])
 
-    @memoize.memoize
+    #@memoize.memoize
     def maximize(self):
         return super(TFOptimize, self).maximize()
