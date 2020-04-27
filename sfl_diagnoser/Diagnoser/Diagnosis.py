@@ -1,7 +1,7 @@
 __author__ = 'amir'
 
 
-class Diagnosis:
+class Diagnosis(object):
     def __init__(self, diagnosis=None):
         if diagnosis is None:
             diagnosis = []
@@ -20,18 +20,18 @@ class Diagnosis:
     def get_prob(self):
         return self.probability
 
+    def set_probability(self, probability):
+        self.probability = probability
+
+    def set_from_tf(self, tf):
+        # self.set_probability(tf.maximize())
+        pass
+
     def __str__(self):
-        return str(sorted(self.diagnosis))+" P: "+str(self.probability)
+        return repr(self)
 
     def __repr__(self):
-        return str(sorted(self.diagnosis))+" P: "+str(self.probability)
+        return str(sorted(self.diagnosis))+" P: "+str(self.get_prob())
 
     def as_dict(self):
-        return {'_diagnosis': map(lambda f: {'_name': f}, sorted(self.diagnosis)), '_probability': self.probability}
-
-
-
-
-
-
-
+        return {'_diagnosis': map(lambda f: {'_name': f}, sorted(self.get_diag())), '_probability': self.get_prob()}

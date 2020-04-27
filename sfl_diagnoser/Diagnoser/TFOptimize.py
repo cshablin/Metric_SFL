@@ -18,6 +18,7 @@ class TfMemoize(object):
         self.memo = {}
         if os.path.exists(MEMOIZE_PATH):
             with open(MEMOIZE_PATH) as f:
+                print MEMOIZE_PATH
                 self.memo = json.load(f)
         atexit.register(self.save)
 
@@ -39,6 +40,10 @@ memoize = TfMemoize()
 class TFOptimize(TF.TF):
     def __init__(self, matrix, error, diagnosis):
         super(TFOptimize, self).__init__(matrix, error, diagnosis)
+        self.key = TFOptimize.get_key(matrix, error, diagnosis)
+
+    @staticmethod
+    def get_key(matrix, error, diagnosis):
         s_passed = []
         s_failed = []
         for line, e in zip(matrix, error):
@@ -50,7 +55,8 @@ class TFOptimize(TF.TF):
                 else:
                     s_passed.append(sum1)
         range1 = range(1, 1 + len(diagnosis))
-        self.key = ".".join(["-".join(map(lambda x: str(Counter(s_passed).get(x, 0)), range1)), "-".join(map(lambda x: str(Counter(s_failed).get(x, 0)), range1))])
+        return ".".join(["-".join(map(lambda x: str(Counter(s_passed).get(x, 0)), range1)),
+                         "-".join(map(lambda x: str(Counter(s_failed).get(x, 0)), range1))])
 
     @memoize.memoize
     def maximize(self):

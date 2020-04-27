@@ -23,4 +23,4 @@ class BarinelInfluence(Barinel.Barinel):
         self.influence_alpha = alpha
 
     def tf_for_diag(self, diagnosis):
-        return TFInfluence.TFInfluence(self.get_matrix(), self.get_error(), diagnosis, self.influence_matrix, self.influence_alpha).maximize()
+        return TFInfluence.TFInfluence(self.get_matrix(), self.get_error(), diagnosis, self.influence_matrix, self.influence_alpha)

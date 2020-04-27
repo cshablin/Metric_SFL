@@ -18,32 +18,32 @@ class Lrtdp(object):
 
     def lrtdp(self):
         state = self.create_start_state()
-        for i in xrange(iterations):
+        for _ in xrange(self.iterations):
             if state.isSolved:
                 break
             self.runLrtdpTrial(state)
         return state.greedyAction(self.greedy_action_treshold)
 
     def create_start_state(self):
-        return self.generateState(experimentInstance)
+        return self.generateState(self.experiment_instance)
 
     def generateState(self, ei):
         key = repr(ei)
         if key not in Lrtdp.states:
-            state = sfl_diagnoser.Planner.lrtdp.lrtdpState.LrtdpState(ei, approach)
+            state = sfl_diagnoser.Planner.lrtdp.lrtdpState.LrtdpState(ei, self.approach, self)
             Lrtdp.states[key] = state
         return Lrtdp.states[key]
 
     @staticmethod
-    def clean():
+    def clear():
         Lrtdp.states.clear()
         Lrtdp.states = dict()
 
     def nextStateDist(self, ei, action):
         dist = ei.next_state_distribution(action)
         stateDist = []
-        for next,prob in dist:
-            stateDist.append((self.generateState(next),prob))
+        for next, prob in dist:
+            stateDist.append((self.generateState(next), prob))
         return stateDist
 
     def runLrtdpTrial(self, state):
@@ -52,14 +52,14 @@ class Lrtdp(object):
             visited.append(state)
             if state.isTerminal():
                 break
-            a = state.greedyAction(greedy_action_treshold)
+            a = state.greedyAction(self.greedy_action_treshold)
             state.update(a)
             state = state.simulate_next_state(a)
         while visited:
-            if not self.checkSolved(visited.pop()):
+            if not self.check_solved(visited.pop()):
                 break
 
-    def checkSolved(self, state):
+    def check_solved(self, state):
         rv = True
         open = []
         closed = {}
@@ -74,8 +74,7 @@ class Lrtdp(object):
             if state.residual(a) > self.epsilon:
                 rv = False
                 break
-            nextStateDist = state.getNextStateDist(a)
-            for next, prob in nextStateDist:
+            for next, prob in state.getNextStateDist(a):
                 if (not next.isSolved) and (next not in open) and (next not in closed):
                     open.append(next)
         if rv:
