@@ -4,7 +4,7 @@ print(p)
 setup(
     name='sfl',
     version='0.0.1',
-    packages=p,
+    packages=[],
     license='',
     author='Amir Elmishali',
     author_email='amir9979@gmail.com',
