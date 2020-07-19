@@ -39,7 +39,7 @@ def similarity_by_function(similarity_function, is_boolean=False):
     return similarity
 
 def functions():
-    import distance
+    #import distance
     similarites_functions = {}
 
     # add functions from distance package
