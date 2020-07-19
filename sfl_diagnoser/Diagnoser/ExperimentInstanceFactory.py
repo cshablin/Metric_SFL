@@ -1,7 +1,7 @@
-import sfl_diagnoser.Diagnoser.ExperimentInstance
-import sfl_diagnoser.Diagnoser.ExperimentInstanceInfluence
-import sfl_diagnoser.Diagnoser.ExperimentInstanceOptimize
-from sfl_diagnoser.Diagnoser.Experiment_Data import Experiment_Data
+import sfl.Diagnoser.ExperimentInstance
+import sfl.Diagnoser.ExperimentInstanceInfluence
+import sfl.Diagnoser.ExperimentInstanceOptimize
+from sfl.Diagnoser.Experiment_Data import Experiment_Data
 
 
 class ExperimentInstanceFactory(object):
@@ -13,7 +13,7 @@ class ExperimentInstanceFactory(object):
 
     @staticmethod
     def get_experiment_instance(initials, error, experiment_type='normal'):
-        classes = {'normal': sfl_diagnoser.Diagnoser.ExperimentInstance.ExperimentInstance,
-                   'influence': sfl_diagnoser.Diagnoser.ExperimentInstanceInfluence.ExperimentInstanceInfluence,
-                   'optimize': sfl_diagnoser.Diagnoser.ExperimentInstanceOptimize.Instances_Management().get_instance}
+        classes = {'normal': sfl.Diagnoser.ExperimentInstance.ExperimentInstance,
+                   'influence': sfl.Diagnoser.ExperimentInstanceInfluence.ExperimentInstanceInfluence,
+                   'optimize': sfl.Diagnoser.ExperimentInstanceOptimize.Instances_Management().get_instance}
         return classes.get(experiment_type, classes['normal'])(initials, error)

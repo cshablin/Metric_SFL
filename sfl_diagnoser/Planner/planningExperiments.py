@@ -9,13 +9,13 @@ import time
 from threading import Thread
 from numpy.random import choice
 
-import sfl_diagnoser.Planner.lrtdp.LRTDPModule
-import sfl_diagnoser.Planner.mcts.main
-from sfl_diagnoser.Planner.mcts.mcts import mcts_uct, clear_states
+import sfl.Planner.lrtdp.LRTDPModule
+import sfl.Planner.mcts.main
+from sfl.Planner.mcts.mcts import mcts_uct, clear_states
 
-import sfl_diagnoser.Diagnoser.diagnoserUtils
-import sfl_diagnoser.Diagnoser.ExperimentInstance
-from sfl_diagnoser.Diagnoser.Diagnosis_Results import Diagnosis_Results
+import sfl.Diagnoser.diagnoserUtils
+import sfl.Diagnoser.ExperimentInstance
+from sfl.Diagnoser.Diagnosis_Results import Diagnosis_Results
 
 
 def timeout(timeout):
@@ -71,7 +71,7 @@ class AbstractPlanner(object):
 
     # @timeout(3600)
     def plan(self, ei):
-        # sfl_diagnoser.Diagnoser.ExperimentInstance.Instances_Management().clear()
+        # sfl.Diagnoser.ExperimentInstance.Instances_Management().clear()
         gc.collect()
         steps = 0
         start = time.time()
@@ -132,11 +132,11 @@ class LRTDPPlanner(AbstractPlanner):
         self.epsilon = epsilon
 
     def plan(self, ei):
-        sfl_diagnoser.Planner.lrtdp.LRTDPModule.Lrtdp.clear()
+        sfl.Planner.lrtdp.LRTDPModule.Lrtdp.clear()
         super(LRTDPPlanner, self).plan(ei)
 
     def _plan(self, ei):
-        return sfl_diagnoser.Planner.lrtdp.LRTDPModule.Lrtdp(ei, epsilon=self.epsilon, iterations=self.iterations,
+        return sfl.Planner.lrtdp.LRTDPModule.Lrtdp(ei, epsilon=self.epsilon, iterations=self.iterations,
                                                              greedy_action_treshold=self.greedy_action_treshold, approach=self.approach).lrtdp()
 
     def get_name(self):
@@ -166,7 +166,7 @@ class PlannerExperiment(object):
     def experiment(self):
         for planner in self.planners:
             print planner.get_name()
-            planner.plan(sfl_diagnoser.Diagnoser.diagnoserUtils.read_json_planning_file(self.planning_file))
+            planner.plan(sfl.Diagnoser.diagnoserUtils.read_json_planning_file(self.planning_file))
 
     @staticmethod
     def get_planners():

@@ -2,8 +2,8 @@ __author__ = 'amir'
 
 import time
 
-import sfl_diagnoser.Diagnoser.ExperimentInstance
-import sfl_diagnoser.Planner.lrtdp.lrtdpState
+import sfl.Diagnoser.ExperimentInstance
+import sfl.Planner.lrtdp.lrtdpState
 
 
 class Lrtdp(object):
@@ -30,7 +30,7 @@ class Lrtdp(object):
     def generateState(self, ei):
         key = repr(ei)
         if key not in Lrtdp.states:
-            state = sfl_diagnoser.Planner.lrtdp.lrtdpState.LrtdpState(ei, self.approach, self)
+            state = sfl.Planner.lrtdp.lrtdpState.LrtdpState(ei, self.approach, self)
             Lrtdp.states[key] = state
         return Lrtdp.states[key]
 

@@ -3,11 +3,11 @@ import math
 import random
 from math import ceil
 import Diagnosis
-import sfl_diagnoser.Diagnoser.dynamicSpectrum
-from sfl_diagnoser.Diagnoser.Experiment_Data import Experiment_Data
-import sfl_diagnoser.Planner.domain_knowledge as domain_knowledge
+import sfl.Diagnoser.dynamicSpectrum
+from sfl.Diagnoser.Experiment_Data import Experiment_Data
+import sfl.Planner.domain_knowledge as domain_knowledge
 import numpy
-from sfl_diagnoser.Diagnoser.Singelton import Singleton
+from sfl.Diagnoser.Singelton import Singleton
 
 TERMINAL_PROB = 0.7
 
@@ -30,7 +30,7 @@ class ExperimentInstance(object):
         return ds
 
     def _create_ds(self):
-        return sfl_diagnoser.Diagnoser.dynamicSpectrum.dynamicSpectrum()
+        return sfl.Diagnoser.dynamicSpectrum.dynamicSpectrum()
 
     def get_optionals_actions(self):
         optionals = [x for x in Experiment_Data().POOL if x not in self.get_initials()]

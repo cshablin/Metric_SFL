@@ -1,4 +1,4 @@
-from sfl_diagnoser.Diagnoser import Barinel
+from sfl.Diagnoser import Barinel
 
 
 class FullMatrix(object):

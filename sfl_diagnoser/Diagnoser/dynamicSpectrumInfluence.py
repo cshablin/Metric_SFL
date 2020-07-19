@@ -1,10 +1,10 @@
-import sfl_diagnoser.Diagnoser
-from sfl_diagnoser.Diagnoser.FullMatrixInfluence import FullMatrixInfluence
-import sfl_diagnoser.Diagnoser.dynamicSpectrum
+import sfl.Diagnoser
+from sfl.Diagnoser.FullMatrixInfluence import FullMatrixInfluence
+import sfl.Diagnoser.dynamicSpectrum
 from functools import partial
 
 
-class DynamicSpectrumInfluence(sfl_diagnoser.Diagnoser.dynamicSpectrum.dynamicSpectrum):
+class DynamicSpectrumInfluence(sfl.Diagnoser.dynamicSpectrum.dynamicSpectrum):
     def __init__(self):
         super(DynamicSpectrumInfluence, self).__init__()
         self.influence_matrix = dict()

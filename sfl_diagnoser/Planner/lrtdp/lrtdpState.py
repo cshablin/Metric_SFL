@@ -2,7 +2,7 @@ __author__ = 'amir'
 import random
 
 import LRTDPModule
-import sfl_diagnoser.Diagnoser.ExperimentInstance
+import sfl.Diagnoser.ExperimentInstance
 
 
 class LrtdpState(object):

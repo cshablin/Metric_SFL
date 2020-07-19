@@ -1,8 +1,8 @@
-from sfl_diagnoser.Diagnoser.diagnoserUtils import readPlanningFile, write_planning_file, write_merged_matrix
-# from sfl_diagnoser.Diagnoser.diagnoserUtils import readPlanningFile, write_planning_file, write_merged_matrix
-from sfl_diagnoser.Diagnoser.Diagnosis_Results import Diagnosis_Results
+from sfl.Diagnoser.diagnoserUtils import readPlanningFile, write_planning_file, write_merged_matrix
+# from sfl.Diagnoser.diagnoserUtils import readPlanningFile, write_planning_file, write_merged_matrix
+from sfl.Diagnoser.Diagnosis_Results import Diagnosis_Results
 
-from sfl_diagnoser.Diagnoser.diagnoserUtils import readPlanningFile, \
+from sfl.Diagnoser.diagnoserUtils import readPlanningFile, \
     write_json_planning_file, \
     write_json_planning_file_by_ei, read_json_planning_file
 
@@ -59,9 +59,9 @@ def abstraction():
 
 
 if __name__ == "__main__":
-    # from sfl_diagnoser.Diagnoser.diagnoserUtils import readPlanningFile
-    # from sfl_diagnoser.Diagnoser.Diagnosis_Results import Diagnosis_Results
-    # import sfl_diagnoser.Diagnoser.ExperimentInstance
+    # from sfl.Diagnoser.diagnoserUtils import readPlanningFile
+    # from sfl.Diagnoser.Diagnosis_Results import Diagnosis_Results
+    # import sfl.Diagnoser.ExperimentInstance
     #
     # inst = readPlanningFile(r"C:\Users\User\Downloads\inputMatrix6_amir.txt")
     # inst.diagnose()
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     # # check_influence()
     # # exit()
     # base = readPlanningFile(r"C:\Users\User\Downloads\MatrixFile4.txt")
-    # from sfl_diagnoser.Planner.HP_Random import main_HP
+    # from sfl.Planner.HP_Random import main_HP
     # main_HP(base)
 
 

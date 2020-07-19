@@ -1,7 +1,7 @@
 __author__ = 'amir'
 from math import sqrt, log
 
-import sfl_diagnoser.Planner.mcts.actionNode
+import sfl.Planner.mcts.actionNode
 import numpy
 
 
@@ -14,7 +14,7 @@ class ChildActions(object):
 
     def __getitem__(self, action):
         if action not in self.children:
-            self.children[action] = sfl_diagnoser.Planner.mcts.actionNode.ActionNode(action, self.instance_node, self.approach)
+            self.children[action] = sfl.Planner.mcts.actionNode.ActionNode(action, self.instance_node, self.approach)
         return self.children[action]
 
     def fully_expanded(self):

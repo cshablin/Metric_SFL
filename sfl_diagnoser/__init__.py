@@ -1,9 +1,9 @@
-from sfl_diagnoser.Diagnoser.diagnoserUtils import readPlanningFile
-from sfl_diagnoser.Diagnoser.Diagnosis_Results import Diagnosis_Results
+from sfl.Diagnoser.diagnoserUtils import readPlanningFile
+from sfl.Diagnoser.Diagnosis_Results import Diagnosis_Results
 from operator import itemgetter
-import sfl_diagnoser.Diagnoser.Experiment_Data
-import sfl_diagnoser.Diagnoser.ExperimentInstance
-import sfl_diagnoser.Planner.HP_Random
+import sfl.Diagnoser.Experiment_Data
+import sfl.Diagnoser.ExperimentInstance
+import sfl.Planner.HP_Random
 import timeit
 import time
 import os
@@ -48,7 +48,7 @@ def write_result_to_file(RESULTS_FILE, bug_id, name, list_pre, list_recall):
 def get_diagnose_results(param, file_path):
     instAmir = readPlanningFile(file_path)
     instAmir.diagnose()
-    list_pre, list_recall = sfl_diagnoser.Planner.HP_Random.main_HP(instAmir, param)
+    list_pre, list_recall = sfl.Planner.HP_Random.main_HP(instAmir, param)
     return list_pre, list_recall
 
 

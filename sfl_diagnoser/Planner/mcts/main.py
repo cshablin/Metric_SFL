@@ -1,6 +1,6 @@
 __author__ = 'amir'
 
-import sfl_diagnoser.Diagnoser.ExperimentInstance
+import sfl.Diagnoser.ExperimentInstance
 import mcts
 
 DEFAULT_BUDGET = 100
@@ -18,7 +18,7 @@ def main_mcts(ei, approach, iterations=DEFAULT_BUDGET):
 
 
 def test_mcts(f):
-    instance = sfl_diagnoser.Diagnoser.diagnoserUtils.readPlanningFile(f)
+    instance = sfl.Diagnoser.diagnoserUtils.readPlanningFile(f)
     return main_mcts(instance)
 
 
