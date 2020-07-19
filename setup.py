@@ -1,9 +1,10 @@
 from setuptools import setup, find_packages
-
+p = find_packages()
+print(p)
 setup(
     name='sfl',
     version='0.0.1',
-    packages=find_packages(),
+    packages=p,
     license='',
     author='Amir Elmishali',
     author_email='amir9979@gmail.com',
