@@ -10,6 +10,7 @@ import TF
 
 prior_p = 0.05
 
+
 class Barinel(object):
 
     def __init__(self):
@@ -50,30 +51,32 @@ class Barinel(object):
         probs_sum = 0.0
         for diag in self.get_diagnoses():
             dk = 0.0
-            if (self.prior_probs == []):
-                dk = math.pow(prior_p,len(diag.get_diag())) #assuming same prior prob. for every component.
+            if self.prior_probs == []:
+                dk = math.pow(prior_p, len(diag.get_diag()))
             else:
                 dk = self.non_uniform_prior(diag)
-            e_dk = self.tf_for_diag(diag.get_diag())
-            diag.probability=e_dk * dk #temporary probability
-            probs_sum += diag.probability
+            tf = self.tf_for_diag(diag.get_diag())
+            diag.set_probability(tf.maximize() * dk)
+            diag.set_from_tf(tf)
+            probs_sum += diag.get_prob()
         for diag in self.get_diagnoses():
             temp_prob = diag.get_prob() / probs_sum
-            diag.probability=temp_prob
+            diag.set_probability(temp_prob)
             new_diagnoses.append(diag)
         self.set_diagnoses(new_diagnoses)
 
     def tf_for_diag(self, diagnosis):
-        return TF.TF(self.get_matrix(), self.get_error(), diagnosis).maximize()
+        return TF.TF(self.get_matrix(), self.get_error(), diagnosis)
 
     def run(self):
-        #initialize
         self.set_diagnoses([])
         new_diagnoses = []
-        diags = Staccato.Staccato().run(self.get_matrix(), self.get_error())
-        for diag in diags:
-            new_diagnoses.append(Diagnosis.Diagnosis(diag))
-        #generate probabilities
+        diagnoses = Staccato.Staccato().run(self.get_matrix(), self.get_error())
+        for diagnosis in diagnoses:
+            new_diagnoses.append(self._new_diagnosis(diagnosis))
         self.set_diagnoses(new_diagnoses)
         self.generate_probs()
         return self.get_diagnoses()
+
+    def _new_diagnosis(self, diagnosis):
+        return Diagnosis.Diagnosis(diagnosis)

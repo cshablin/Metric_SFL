@@ -52,7 +52,7 @@ class TF(object):
             ub = [1 for _ in self.get_diagnosis()]
             import scipy.optimize
             self.max_value = -scipy.optimize.minimize(self.probabilty_TF,initialGuess,method="L-BFGS-B"
-                                        ,bounds=zip(lb,ub), tol=1e-2,options={'maxiter':10}).fun
+                                        ,bounds=zip(lb,ub), tol=1e-3,options={'maxiter':100}).fun
             # self.max_value = -scipy.optimize.minimize(self.probabilty_TF,initialGuess,method="TNC"
             #                             ,bounds=zip(lb,ub), tol=1e-2,options={'maxiter':10}).fun
             # self.max_value = -scipy.optimize.minimize(self.probabilty_TF,initialGuess,method="SLSQP"
