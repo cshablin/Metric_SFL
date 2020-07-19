@@ -2,7 +2,6 @@
 # each function recieves experiments instance and
 # return sorted list of optional tests ordered by the chosen metric
 
-import distance
 import scipy.spatial.distance
 
 import sfl.Diagnoser.ExperimentInstance
@@ -39,17 +38,19 @@ def similarity_by_function(similarity_function, is_boolean=False):
         return [x /sum(similarities) for x in similarities]
     return similarity
 
-similarites_functions = {}
+def functions():
+    import distance
+    similarites_functions = {}
 
-# add functions from distance package
-for f in ["levenshtein", "hamming", "sorensen", "jaccard"]:
-    similarites_functions[f] = similarity_by_function(distance.__dict__[f])
+    # add functions from distance package
+    for f in ["levenshtein", "hamming", "sorensen", "jaccard"]:
+        similarites_functions[f] = similarity_by_function(distance.__dict__[f])
 
-# add non boolean functions from scipy.spatial.distance
-for f in ["braycurtis", "canberra", "chebyshev", "cityblock", "cosine", "euclidean","sqeuclidean"]:
-    similarites_functions[f] = similarity_by_function(scipy.spatial.distance.__dict__[f])
+    # add non boolean functions from scipy.spatial.distance
+    for f in ["braycurtis", "canberra", "chebyshev", "cityblock", "cosine", "euclidean","sqeuclidean"]:
+        similarites_functions[f] = similarity_by_function(scipy.spatial.distance.__dict__[f])
 
-# add boolean functions from scipy.spatial.distance
-for f in ["dice", "hamming", "jaccard", "kulsinski", "matching", "rogerstanimoto", "russellrao", "sokalmichener",
-          "sokalsneath", "yule"]:
-    similarites_functions[f] = similarity_by_function(scipy.spatial.distance.__dict__[f], is_boolean=True)
+    # add boolean functions from scipy.spatial.distance
+    for f in ["dice", "hamming", "jaccard", "kulsinski", "matching", "rogerstanimoto", "russellrao", "sokalmichener",
+              "sokalsneath", "yule"]:
+        similarites_functions[f] = similarity_by_function(scipy.spatial.distance.__dict__[f], is_boolean=True)
