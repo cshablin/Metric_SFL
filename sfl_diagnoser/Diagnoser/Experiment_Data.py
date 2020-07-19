@@ -25,7 +25,7 @@ class Experiment_Data(object):
     def set_values(self, priors_arg, bugs_arg, pool_arg, components_arg, extimated_pool_arg=None, experiment_type=None, **kwargs):
         self.clear()
         self.PRIORS = priors_arg
-        self.BUGS = bugs_arg
+        self.BUGS = map(lambda x: x.lower(), bugs_arg)
         self.POOL = pool_arg
         self.COMPONENTS_NAMES = components_arg
         self.REVERSED_COMPONENTS_NAMES = dict(map(lambda x: tuple(reversed(x)), self.COMPONENTS_NAMES.items()))
