@@ -9,10 +9,10 @@ def main_mcts(ei, approach, iterations=DEFAULT_BUDGET):
     steps = 0
     state = ei
     mcts.clear_states()
-    while (not state.isTerminal()) and ( not state.AllTestsReached()):
+    while not state.isTerminal() and not state.AllTestsReached():
         steps += 1
         action, weight = mcts.mcts_uct(state, iterations, approach)
-        state = sfl_diagnoser.Diagnoser.ExperimentInstance.addTests(state, action)
+        state = state.addTests(action)
     precision, recall = state.calc_precision_recall()
     return precision, recall, steps, repr(state)
 

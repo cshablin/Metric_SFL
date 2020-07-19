@@ -8,33 +8,49 @@ class FullMatrix(object):
         self.error=[]
 
     def diagnose(self):
-        bar= Barinel.Barinel()
+        bar = self._create_barinel()
         bar.set_matrix_error(self.matrix,self.error)
         bar.set_prior_probs(self.probabilities)
         return bar.run()
 
+    def _create_barinel(self):
+        return Barinel.Barinel()
+
     def save_to_csv_file(self, out_file):
         import csv
-        lines = [self.probabilities] + map(lambda x : x[0] + [x[1]] ,zip(self.matrix, self.error))
+        lines = [self.probabilities] + map(lambda x: x[0] + [x[1]], zip(self.matrix, self.error))
         with open(out_file, "wb") as f:
             writer = csv.writer(f)
             writer.writerows(lines)
 
+    def set_matrix(self, matrix):
+        self.matrix = matrix
+
+    def set_probabilities(self, probabilities):
+        self.probabilities = probabilities
+
+    def set_error(self, error):
+        self.error = error
+
     # optimization: remove unreachable components & components that pass all their tests
-    # return: optimized FullMatrix, chosen_components( indices)
-    @staticmethod
-    def optimize_FullMatrix(fullMatrix):
-        failed_tests = map(lambda test: list(enumerate(test[0])), filter(lambda test: test[1] == 1, zip(fullMatrix.matrix, fullMatrix.error)))
-        used_components = reduce(set.__or__, map(lambda test: set(map(lambda comp: comp[0], filter(lambda comp: comp[1] == 1, test))), failed_tests), set())
-        optimizedMatrix = FullMatrix()
-        optimizedMatrix.probabilities = [x[1] for x in enumerate(fullMatrix.probabilities) if x[0] in used_components]
+    # return: optimized FullMatrix, chosen_components( indices), used_tests
+    def optimize(self):
+        failed_tests = map(lambda test: list(enumerate(test[0])), filter(lambda test: test[1] == 1, zip(self.matrix, self.error)))
+        used_components = dict(enumerate(sorted(reduce(set.__or__, map(lambda test: set(map(lambda comp: comp[0], filter(lambda comp: comp[1] == 1, test))), failed_tests), set()))))
+        optimizedMatrix = self._create_full_matirx()
+        optimizedMatrix.set_probabilities([x[1] for x in enumerate(self.probabilities) if x[0] in used_components])
         newErr = []
         newMatrix = []
-        for test, err in zip(fullMatrix.matrix, fullMatrix.error):
-            newTest = [x[1] for x in enumerate(test) if x[0] in used_components]
+        used_tests = []
+        for i, (test, err) in enumerate(zip(self.matrix, self.error)):
+            newTest = map(lambda i: test[i], sorted(used_components.values()))
             if 1 in newTest: ## optimization could remove all comps of a test
                 newMatrix.append(newTest)
                 newErr.append(err)
-        optimizedMatrix.matrix = newMatrix
-        optimizedMatrix.error = newErr
-        return optimizedMatrix, sorted(used_components)
+                used_tests.append(i)
+        optimizedMatrix.set_matrix(newMatrix)
+        optimizedMatrix.set_error(newErr)
+        return optimizedMatrix, used_components, sorted(used_tests)
+
+    def _create_full_matirx(self):
+        return FullMatrix()

@@ -1,26 +1,12 @@
 import sfl_diagnoser.Diagnoser.ExperimentInstance
+import sfl_diagnoser.Diagnoser.ExperimentInstanceFactory
 from sfl_diagnoser.Diagnoser.FullMatrix import FullMatrix
 from sfl_diagnoser.Diagnoser.Experiment_Data import Experiment_Data
 
 __author__ = 'amir'
 
 import csv
-
-def readMatrixWithProbabilitiesFile(fileName):
-    reader=csv.reader(open(fileName,"r"))
-    lines=[x for x in reader]
-    probabilies=[float(x) for x in  lines[0][:-1]]
-    matrix=[]
-    error=[]
-    lines=[[int(y) for y in x ] for x in lines[1:]]
-    for line in lines:
-        error.append(line[-1])
-        matrix.append(line[:-1])
-    ans= FullMatrix()
-    ans.probabilities=probabilies
-    ans.matrix=matrix
-    ans.error=error
-    return ans
+import json
 
 def readPlanningFile(fileName, delimiter=";"):
     lines=open(fileName,"r").readlines()
@@ -51,61 +37,9 @@ def readPlanningFile(fileName, delimiter=";"):
         testsPool[ind] = actualTrace
         error[ind] = err
     Experiment_Data().set_values(priors, bugs, testsPool, components, estimatedTestsPool)
-    return sfl_diagnoser.Diagnoser.ExperimentInstance.ExperimentInstance(initials, error)
+    return sfl_diagnoser.Diagnoser.ExperimentInstanceFactory.ExperimentInstanceFactory.get_experiment_instance(initials, error)
 
 
-def diagnoseTests():
-    full = readMatrixWithProbabilitiesFile("C:\GitHub\matrix\OPT__Rand.csv")
-    print "full",[x.diagnosis for x in full.diagnose()]
-    ds = full.convetTodynamicSpectrum()
-    matrix_ = ds.convertToFullMatrix()
-    print "matrix",[x.diagnosis for x in matrix_.diagnose()]
-    Fullm,chosen= FullMatrix.optimize_FullMatrix(matrix_)
-    print "matrixOPT",[x.diagnosis for x in Fullm.diagnose()] ## should result wrong comps!!
-    print [x.diagnosis for x in ds.diagnose()]
-
-
-
-
-def readMatrixTest():
-    global full, ds
-    full = readMatrixWithProbabilitiesFile("C:\GitHub\matrix\OPT__Rand.csv")
-    print full.probabilities, len(full.probabilities)
-    print full.error[0]
-    print full.matrix[0]
-    ds = full.convetTodynamicSpectrum()
-    print ds.probabilities
-    print ds.error[0]
-    print ds.TestsComponents[0]
-    matrix_ = ds.convertToFullMatrix()
-    print matrix_.probabilities
-    opt = FullMatrix.optimize_FullMatrix(matrix_)
-    print opt.probabilities
-    print len(opt.error), len(matrix_.error)
-
-
-
-def readPlannerTest():
-    global instance
-    print "planner"
-    file="C:\projs\\40_uniform_9.txt"
-    instance = readPlanningFile(file)
-    # print instance.priors
-    # print instance.error
-    # print instance.bugs
-    # print instance.initial_tests
-    # print instance.pool[0]
-    instance.initial_tests=range(len(instance.error))
-    instance.diagnose()
-    print [x.diagnosis for x in instance.diagnoses]
-    ds=instance.initials_to_DS()
-    print [x.diagnosis for x in ds.diagnose()]
-    fm=ds.convertToFullMatrix()
-    print [x.diagnosis for x in fm.diagnose()]
-
-    # print fm.error
-    # for i in range(len(fm.error)):
-    #     print fm.matrix[i]
 
 def write_planning_file(out_path,
                         bugs,
@@ -150,6 +84,11 @@ def write_planning_file(out_path,
         writer = csv.writer(f, delimiter=delimiter)
         writer.writerows(lines)
 
+def write_planning_file_by_ei(out_path, ei):
+    tests_details = map(lambda x: (x[0], map(Experiment_Data().COMPONENTS_NAMES.get, x[1]), ei.error[x[0]]),
+                        Experiment_Data().POOL.items())
+    write_planning_file(out_path, Experiment_Data().BUGS, tests_details)
+
 def write_merged_matrix(instance, out_matrix):
     componets = instance.get_components_vectors()
     similiar_componets = {}
@@ -166,8 +105,53 @@ def write_merged_matrix(instance, out_matrix):
     new_pool = map(lambda test: [test, list(set(map(get_name, Experiment_Data().POOL[test]))), instance.error[test]], Experiment_Data().POOL)
     write_planning_file(out_matrix, new_bugs, new_pool)
 
+
 def save_ds_to_matrix_file(ds, out_file):
     tests_details = map(lambda details: (
     str(details[0]), map(lambda c: Experiment_Data().COMPONENTS_NAMES[c], details[1]), details[2]),
                         list(zip(ds.tests_names, ds.TestsComponents, ds.error)))
     write_planning_file(out_file, map(lambda c: Experiment_Data().COMPONENTS_NAMES[c], Experiment_Data().BUGS), tests_details)
+
+
+def read_json_planning_file(file_path):
+    with open(file_path, "r") as f:
+        instance = json.loads(f.read())
+    return read_json_planning_instance(instance)
+
+
+def read_json_planning_instance(instance):
+    assert 'bugs' in instance,"bugs are not defined in planning_file"
+    assert 'tests_details' in instance,"tests_details are not defined in planning_file"
+    assert 'initial_tests' in instance,"initial_tests are not defined in planning_file"
+    experiment_type = instance.get('experiment_type', None)
+    testsPool = dict(map(lambda td: (td[0], td[1]), instance['tests_details']))
+    error = dict(map(lambda td: (td[0], td[2]), instance['tests_details']))
+    components = dict(instance['components_names'])
+    estimatedTestsPool = instance.get('estimatedTestsPool', {})
+    priors = instance.get('priors', [0.1 for _ in components])
+    Experiment_Data().set_values(priors, instance['bugs'], testsPool, components, estimatedTestsPool)
+    map(lambda x: setattr(Experiment_Data(), x[0], x[1]), instance.items())
+    return sfl_diagnoser.Diagnoser.ExperimentInstanceFactory.ExperimentInstanceFactory.get_experiment_instance(instance['initial_tests'], error, experiment_type)
+
+
+def write_json_planning_file(out_path, tests_details, bugs=None, initial_tests=None, **kwargs):
+    instance = dict()
+    instance['bugs'] = bugs or Experiment_Data().BUGS
+    components_names = list(set(reduce(list.__add__, map(lambda details: details[1], tests_details), [])))
+    instance['components_names'] = list(enumerate(components_names))
+    map_component_id = dict(map(lambda x: tuple(reversed(x)), list(enumerate(components_names))))
+    full_tests_details = []
+    for name, trace, outcome in tests_details:
+        full_tests_details.append(
+            (name, sorted(set(map(lambda comp: map_component_id[comp], trace)), key=lambda x: x), outcome))
+    instance['tests_details'] = full_tests_details
+    if initial_tests is None:
+        initial_tests = map(lambda details: details[0], full_tests_details)
+    instance['initial_tests'] = initial_tests
+    instance.update(kwargs)
+    with open(out_path, "wb") as f:
+        json.dump(instance, f)
+
+def write_json_planning_file_by_ei(out_path, ei, **kwargs):
+    tests_details = map(lambda x: (x[0], map(Experiment_Data().COMPONENTS_NAMES.get, x[1]), ei.error[x[0]]), Experiment_Data().POOL.items())
+    write_json_planning_file(out_path, tests_details, **kwargs)

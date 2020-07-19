@@ -5,50 +5,35 @@ from math import ceil
 import Diagnosis
 import sfl_diagnoser.Diagnoser.dynamicSpectrum
 from sfl_diagnoser.Diagnoser.Experiment_Data import Experiment_Data
-import sfl_diagnoser.Planner.domain_knowledge
+import sfl_diagnoser.Planner.domain_knowledge as domain_knowledge
 import numpy
-import sfl_diagnoser.Diagnoser.diagnoserUtils
 from sfl_diagnoser.Diagnoser.Singelton import Singleton
-
-
-class Instances_Management(object):
-    __metaclass__ = Singleton
-
-    def __init__(self):
-        self.instances = {}
-        self.clear()
-
-    def clear(self):
-        self.instances = {}
-
-    def get_instance(self, key):
-        if key not in self.instances:
-            self.instances[key] = self.create_instance_from_key(key)
-        return self.instances[key]
-
-    def create_instance_from_key(self, key):
-        initial, failed = key.split('-')
-        error = dict([(i, 1 if i in eval(failed) else 0) for i in Experiment_Data().POOL])
-        return ExperimentInstance(eval(initial), error)
 
 TERMINAL_PROB = 0.7
 
-class ExperimentInstance:
+
+class ExperimentInstance(object):
     def __init__(self, initial_tests, error):
-        self.initial_tests=initial_tests
+        self.initial_tests = initial_tests
         self.error = error
-        self.diagnoses=[]
+        self.diagnoses = []
+
+    def get_experiment_type(self):
+        return 'normal'
 
     def initials_to_DS(self):
-        ds = sfl_diagnoser.Diagnoser.dynamicSpectrum.dynamicSpectrum()
-        ds.TestsComponents = copy.deepcopy([Experiment_Data().POOL[test] for test in self.initial_tests])
-        ds.probabilities=list(Experiment_Data().PRIORS)
-        ds.error=[self.error[test] for test in self.initial_tests]
-        ds.tests_names = list(self.initial_tests)
+        ds = self._create_ds()
+        ds.TestsComponents = copy.deepcopy([Experiment_Data().POOL[test] for test in self.get_initials()])
+        ds.probabilities = list(Experiment_Data().PRIORS)
+        ds.error=[self.get_error()[test] for test in self.get_initials()]
+        ds.tests_names = list(self.get_initials())
         return ds
 
+    def _create_ds(self):
+        return sfl_diagnoser.Diagnoser.dynamicSpectrum.dynamicSpectrum()
+
     def get_optionals_actions(self):
-        optionals = [x for x in Experiment_Data().POOL if x not in self.initial_tests]
+        optionals = [x for x in Experiment_Data().POOL if x not in self.get_initials()]
         return optionals
 
     def get_components_vectors(self):
@@ -60,20 +45,18 @@ class ExperimentInstance:
 
     def get_optionals_probabilities(self):
         optionals = self.get_optionals_actions()
-        probabilites = [ 1.0/len(optionals) for x in optionals]
-        return  optionals, probabilites
+        probabilites = [1.0/len(optionals) for _ in optionals]
+        return optionals, probabilites
 
     def get_optionals_probabilities_by_approach(self, approach, *args, **kwargs):
-        optionals, probabilities = [], []
         if approach == "uniform":
-            optionals, probabilities = self.get_optionals_probabilities()
+            return self.get_optionals_probabilities()
         elif approach == "hp":
-            optionals, probabilities = self.next_tests_by_hp()
+            return self.next_tests_by_hp()
         elif approach == "entropy":
-            optionals, probabilities = self.next_tests_by_entropy(*args, **kwargs)
+            return self.next_tests_by_entropy(*args, **kwargs)
         else:
-            raise RuntimeError("self.approach is not configured")
-        return optionals, probabilities
+            raise RuntimeError("approach is not configured")
 
     def get_components_probabilities(self):
         """
@@ -82,11 +65,11 @@ class ExperimentInstance:
         """
         self.diagnose()
         compsProbs={}
-        for d in self.diagnoses:
+        for d in self.get_diagnoses():
             p = d.get_prob()
             for comp in d.get_diag():
-                compsProbs[comp] = compsProbs.get(comp,0) + p
-        return sorted(compsProbs.items(),key=lambda x: x[1], reverse=True)
+                compsProbs[comp] = compsProbs.get(comp, 0) + p
+        return sorted(compsProbs.items(), key=lambda x: x[1], reverse=True)
 
     def get_components_probabilities_by_name(self):
         return map(lambda component: (Experiment_Data().COMPONENTS_NAMES[component[0]], component[1]), self.get_components_probabilities())
@@ -135,7 +118,6 @@ class ExperimentInstance:
         tests_probabilities = [x / sum(tests_probabilities) for x in tests_probabilities]
         return optionals, tests_probabilities
 
-
     def next_tests_by_bd(self):
         self.diagnose()
         probabilities = []
@@ -143,7 +125,7 @@ class ExperimentInstance:
         for test in optionals:
             p = 0.0
             trace = Experiment_Data().POOL[test]
-            for d in self.diagnoses:
+            for d in self.get_diagnoses():
                 p += (d.get_prob() / len(d.get_diag())) * ([x for x in d.get_diag() if x in trace])
             probabilities.append(p)
         probabilities = [abs(x) for x in probabilities]
@@ -159,7 +141,7 @@ class ExperimentInstance:
         optionals = []
         threshold_sum = 0.0
         # optionals = self.get_optionals_actions()
-        optionals_seperator, tests_probabilities = Planner.domain_knowledge.seperator_hp(self)
+        optionals_seperator, tests_probabilities = domain_knowledge.seperator_hp(self)
         # optionals, tests_probabilities = self.next_tests_by_hp()
         for t, p in sorted(zip(optionals_seperator, tests_probabilities), key=lambda x: x[1], reverse=True)[:int(ceil(len(optionals_seperator) * threshold))]:
             # if threshold_sum > threshold:
@@ -186,7 +168,7 @@ class ExperimentInstance:
     def entropy(self):
         self.diagnose()
         sum = 0.0
-        for d in self.diagnoses:
+        for d in self.get_diagnoses():
             p = d.get_prob()
             sum -= p * math.log(p)
         return sum
@@ -237,14 +219,14 @@ class ExperimentInstance:
 
     def getMaxProb(self):
         self.diagnose()
-        maxP=max([x.probability for x in self.diagnoses])
+        maxP=max([x.probability for x in self.get_diagnoses()])
         return maxP
 
     def isTerminal(self):
         return self.getMaxProb() > TERMINAL_PROB
 
     def AllTestsReached(self):
-        return len(self.get_optionals_actions())== 0
+        return len(self.get_optionals_actions()) == 0
 
     def compute_pass_prob(self,action):
         trace = Experiment_Data().POOL[action]
@@ -257,10 +239,10 @@ class ExperimentInstance:
         return round(pass_Probability, 6)
 
     def next_state_distribution(self,action):
-        pass_Probability=self.compute_pass_prob(action)
-        ei_fail = simulateTestOutcome(self, action,0)
-        ei_pass = simulateTestOutcome(self, action,1)
-        return [(ei_fail,pass_Probability),(ei_pass,1-pass_Probability)]
+        pass_Probability = self.compute_pass_prob(action)
+        ei_fail = self.simulateTestOutcome(action, 0)
+        ei_pass = self.simulateTestOutcome(action, 1)
+        return [(ei_fail, pass_Probability), (ei_pass, 1-pass_Probability)]
 
     def simulate_next_test_outcome(self,action):
         pass_Probability=self.compute_pass_prob(action)
@@ -275,12 +257,12 @@ class ExperimentInstance:
 
     def diagnose(self):
         if self.diagnoses == []:
-            self.diagnoses=self.initials_to_DS().diagnose()
+            self.diagnoses = self.initials_to_DS().diagnose()
 
     def get_named_diagnoses(self):
         self.diagnose()
         named_diagnoses = []
-        for diagnosis in self.diagnoses:
+        for diagnosis in self.get_diagnoses():
             named = Diagnosis.Diagnosis(map(lambda id: Experiment_Data().COMPONENTS_NAMES[id], diagnosis.diagnosis))
             named.probability = diagnosis.probability
             named_diagnoses.append(named)
@@ -310,7 +292,7 @@ class ExperimentInstance:
         recall_accum=0
         precision_accum=0
         validComps=[x for x in range(max(reduce(list.__add__, Experiment_Data().POOL.values()))) if x not in Experiment_Data().BUGS]
-        for d in self.diagnoses:
+        for d in self.get_diagnoses():
             dg=d.diagnosis
             pr=d.probability
             precision, recall = ExperimentInstance.precision_recall_diag(Experiment_Data().BUGS, dg, pr, validComps)
@@ -337,26 +319,31 @@ class ExperimentInstance:
         optional_tests = map(lambda enum: enum[1], filter(lambda enum: enum[0] in self.initial_tests, enumerate(Experiment_Data().POOL)))
         return len(set(map(str, optional_tests)))
 
-
     def __repr__(self):
         return repr(self.initial_tests)+"-"+repr([name for name,x in self.error.items() if x==1])
 
+    def get_diagnoses(self):
+        self.diagnose()
+        return self.diagnoses
 
-def create_key(initial_tests, error):
-    return repr(sorted(initial_tests))+"-"+repr(sorted(map(lambda x: x[0], filter(lambda x: x[1] ==1, error.items()))))
+    def get_initials(self):
+        return self.initial_tests
 
-def addTests(ei, next_tests):
-    """
-    add tests with real outcome
-    """
-    tests_to_add = [next_tests] if type(next_tests) != list else next_tests
-    for t in tests_to_add:
-        ei = simulateTestOutcome(ei, t, ei.error[t])
-    return ei
+    def get_error(self):
+        return self.error
 
-def simulateTestOutcome(ei, next_test, outcome):
-    initial_tests = copy.deepcopy(ei.initial_tests)
-    initial_tests.append(next_test)
-    error = dict(ei.error)
-    error[next_test] = outcome
-    return Instances_Management().get_instance(create_key(initial_tests, error))
+    def simulateTestOutcome(self, next_test, outcome):
+        initial_tests = copy.deepcopy(self.initial_tests)
+        initial_tests.append(next_test)
+        error = dict(self.error)
+        error[next_test] = outcome
+        return self.create_instance(initial_tests, error)
+
+    def create_instance(self, initial_tests, error):
+        return ExperimentInstance(initial_tests, error)
+
+    def addTests(self, next_tests):
+        tests_to_add = [next_tests] if type(next_tests) != list else next_tests
+        for t in tests_to_add:
+            ei = self.simulateTestOutcome(t, self.error[t])
+        return ei

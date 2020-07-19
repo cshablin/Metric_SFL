@@ -38,10 +38,12 @@ class Staccato():
     def join(self, diagnosis, comp):
         return sorted(list(diagnosis) + [comp])
 
-    def is_subsumed(self, diagnoses, candidate):
+    def add_if_not_subsumed(self, diagnoses, candidate):
         for current_d in diagnoses:
             if current_d.issubset(candidate):
-                return True
+                return
+        diagnoses.append(candidate)
+
         return False
 
     def runStrip(self, M_matrix, e_vector, strip):
@@ -77,8 +79,7 @@ class Staccato():
             #scan "tag" diagnoses
             for tag_diag in diagnoses_tag:
                 tag_diag.add(j)
-                if (not self.is_subsumed(diagnoses, tag_diag)):
-                    diagnoses.append(tag_diag)
+                self.add_if_not_subsumed(diagnoses, tag_diag)
             #end inner loop
             i=i+1
         #end outer loop

@@ -1,27 +1,46 @@
 __author__ = 'amir'
 from math import sqrt, log
 
-import Planner.mcts.actionNode
+import sfl_diagnoser.Planner.mcts.actionNode
 import numpy
 
 
-class InstanceNode(object):
+class ChildActions(object):
+    def __init__(self, approach, actions, probabilities, instance_node):
+        self.instance_node = instance_node
+        self.approach = approach
+        self.children = dict()
+        self.actions = sorted(zip(actions, probabilities), key=lambda x: x[1], reverse=True)
 
-    def __init__(self, parent, action, experimentInstance, approach):
+    def __getitem__(self, action):
+        if action not in self.children:
+            self.children[action] = sfl_diagnoser.Planner.mcts.actionNode.ActionNode(action, self.instance_node, self.approach)
+        return self.children[action]
+
+    def fully_expanded(self):
+        return len(self.actions) == len(self.children) and all(map(lambda x: x.fully_expanded(), self.children.values()))
+
+    def get_children(self, all_children=True):
+        if all_children:
+            return zip(*self.actions)[0]
+        return self.children.keys()
+
+
+class InstanceNode(object):
+    def __init__(self, parent, action, experiment_instance, approach):
         """
         approach - how to combine tests probabilities to qvalue.
             can be one of the following: "uniform" , "hp", "entropy"
         """
-        self.experimentInstance = experimentInstance
+        self.experiment_instance = experiment_instance
         self.approach = approach
-        self.parents = {}
+        self.parents = dict()
         if not parent is None:
             self.parents[action] = parent
-        self.children  = {}
-        for act in self.experimentInstance.get_optionals_actions():
-            self.children[act] = Planner.mcts.actionNode.ActionNode(act, self, self.approach)
-        self.visits = dict.fromkeys(self.children.keys(), 0)
-        self.value = dict.fromkeys(self.children.keys(), 0)
+        actions, probabilities = self.experiment_instance.get_optionals_probabilities_by_approach(self.approach)
+        self.children_ = ChildActions(self.approach, actions, probabilities, self)
+        self.visits = dict()
+        self.value = dict()
 
     @property
     def weight(self):
@@ -31,23 +50,6 @@ class InstanceNode(object):
         if sum(self.visits.values()) == 0:
             return 0
         return sum(self.value.values()) / float(sum(self.visits.values()))
-
-    def find_childs(self):
-        changed = False
-        for c in self.children:
-            action = self.children[c]
-            if not action.fully_expanded():
-                action.getStatesIfExists()
-                if action.fully_expanded():
-                    changed = True
-        if changed:
-            self.update_from_childs()
-
-    def update_from_childs(self):
-        for c in self.children:
-            action = self.children[c]
-            self.visits[c] = action.visits()
-            self.value[c] = action.value()
 
     def search_weight(self, c):
         """
@@ -68,27 +70,27 @@ class InstanceNode(object):
         return weight
 
     def add_parent(self, parent, action):
-        self.parents[action]  = parent
+        self.parents[action] = parent
 
     def result(self, action):
         """
         The state resulting from the given action taken on the current node
         state by the node player.
         """
-        return self.experimentInstance.simulate_next_ei(action)[1]
+        return self.experiment_instance.simulate_next_ei(action)[1]
 
     def terminal(self):
         """
         Whether the current node state is terminal.
         """
-        return self.experimentInstance.isTerminal()
+        return self.experiment_instance.isTerminal()
 
     def fully_expanded(self):
         """
         Whether all child nodes have been expanded (instantiated). Essentially
         this just checks to see if any of its children are set to None.
         """
-        return not None in self.children.values()
+        return self.children_.fully_expanded()
 
     def expand(self):
         """
@@ -96,23 +98,24 @@ class InstanceNode(object):
         otherwise raises an exception) and returns it.
         """
         try:
-            action = filter(lambda c: not c.fully_expanded(),self.children.values())[0]
+            for action in self.children_.get_children():
+                if not self.children_[action].fully_expanded():
+                    return self.children_[action].expand()
         except ValueError:
             raise Exception('Node is already fully expanded')
-        return action.expand()
 
     def best_child(self, c=1/sqrt(2)):
         """
         return the action with max search_weight + hp. in case that action not expanded weight = 0 .
         """
-        if not self.fully_expanded():
-            raise Exception('Node is not fully expanded')
+        # if not self.fully_expanded():
+        #     raise Exception('Node is not fully expanded')
         values = []
-        for action in self.children:
-            weight = self.children[action].search_weight(c)
+        for action in self.children_.get_children():
+            weight = self.children_[action].search_weight(c)
             values.append((action, weight))
         action = max(values, key=lambda x: x[1])[0]
-        return self.children[action].expand()
+        return self.children_[action].expand()
 
     def best_action(self, c=1/sqrt(2)):
         """
@@ -120,7 +123,7 @@ class InstanceNode(object):
         node.
         """
         child = self.best_child(c)
-        action = filter(lambda parent: parent[1] == self,child.parents.items())[0][0]
+        action = filter(lambda parent: parent[1] == self, child.parents.items())[0][0]
         return action, child.weight
 
     def simulation(self):
@@ -130,12 +133,12 @@ class InstanceNode(object):
         the given player.
         """
         steps = 1
-        ei = self.experimentInstance
-        while (not ei.isTerminal()) and ( not ei.AllTestsReached()):
-            optionals, probabilities = self.experimentInstance.get_optionals_probabilities_by_approach(self.approach)
+        ei = self.experiment_instance
+        while (not ei.isTerminal()) and (not ei.AllTestsReached()):
+            optionals, probabilities = self.experiment_instance.get_optionals_probabilities_by_approach(self.approach)
             action = numpy.random.choice(optionals, p=probabilities)
             ei = ei.simulate_next_ei(action)[1]
-            steps = steps + 1
-        if  not ei.isTerminal():
+            steps += 1
+        if not ei.isTerminal():
             steps = float('inf')
         return -steps

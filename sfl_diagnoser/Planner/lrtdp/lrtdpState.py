@@ -6,7 +6,7 @@ import sfl_diagnoser.Diagnoser.ExperimentInstance
 
 
 class LrtdpState(object):
-    def __init__(self,experimentInstance, approach):
+    def __init__(self, experimentInstance, approach, parent):
         """
         experimentInstance - the instance of this state
         approach - how to combine tests probabilities to qvalue.
@@ -19,6 +19,7 @@ class LrtdpState(object):
         if self.isTerminal():
             self.value = 0
         self.simulationCount = 0
+        self.parent = parent
 
     def getMaxProb(self):
         self.experimentInstance.diagnose()
@@ -27,7 +28,7 @@ class LrtdpState(object):
 
     # do action and return observation
     def addTest(self,ind):
-        return sfl_diagnoser.Diagnoser.ExperimentInstance.addTests(self.experimentInstance, ind)
+        return self.experimentInstance.addTests(ind)
 
     def greedyAction(self, treshold = 1):
         return random.choice(self.getGreedyActions(treshold))
@@ -54,8 +55,8 @@ class LrtdpState(object):
             return filtered_actions
         return result
 
-    def getNextStateDist(self,action):
-        return LRTDPModule.nextStateDist(self.experimentInstance, action)
+    def getNextStateDist(self, action):
+        return self.parent.nextStateDist(self.experimentInstance, action)
 
     def qValue(self,action):
         q = 1 # cost
@@ -94,7 +95,7 @@ class LrtdpState(object):
         return self.simulationCount==0
 
     def simulate_next_state(self,action):
-        return LRTDPModule.generateState(self.experimentInstance.simulate_next_ei(action)[1])
+        return self.parent.generateState(self.experimentInstance.simulate_next_ei(action)[1])
 
     def __repr__(self):
         return repr(self.experimentInstance)

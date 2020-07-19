@@ -7,14 +7,15 @@ import glob
 import os
 import time
 from threading import Thread
+from numpy.random import choice
 
-import Planner.lrtdp.LRTDPModule
-import Planner.mcts.main
-import Planner.pomcp.main
+import sfl_diagnoser.Planner.lrtdp.LRTDPModule
+import sfl_diagnoser.Planner.mcts.main
+from sfl_diagnoser.Planner.mcts.mcts import mcts_uct, clear_states
 
-import HP_Random
-import Planning_Results
 import sfl_diagnoser.Diagnoser.diagnoserUtils
+import sfl_diagnoser.Diagnoser.ExperimentInstance
+from sfl_diagnoser.Diagnoser.Diagnosis_Results import Diagnosis_Results
 
 
 def timeout(timeout):
@@ -22,11 +23,13 @@ def timeout(timeout):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             res = [Exception('function [%s] timeout [%s seconds] exceeded!' % (func.__name__, timeout))]
+
             def newFunc():
                 try:
                     res[0] = func(*args, **kwargs)
                 except Exception, e:
                     res[0] = e
+
             t = Thread(target=newFunc)
             t.daemon = True
             try:
@@ -39,123 +42,155 @@ def timeout(timeout):
             if isinstance(ret, BaseException):
                 raise ret
             return ret
+
         return wrapper
+
     return deco
 
-def mkOneDir(dir):
-    if not os.path.isdir(dir):
-            os.mkdir(dir)
-@timeout(3600)
-def get_results_from_mdp(ei, alg):
-    gc.collect()
-    start = time.time()
-    precision, recall, steps, rpr = alg(ei)
-    total_time = time.time() - start
-    return precision, recall, steps, total_time, rpr
+
+class Metrics(object):
+    def __init__(self, ei, step):
+        ei.diagnose()
+        self.metrics = {"step": step}
+        diagnosis_res = Diagnosis_Results(ei.diagnoses, ei.initial_tests, ei.error)
+        self.metrics.update(diagnosis_res.metrics)
+        self.metrics["max_probability"] = ei.getMaxProb()
+        self.metrics["#_diagnoses"] = len(ei.diagnoses)
+
+    def get_metrics(self):
+        return self.metrics
+
+    def add_time(self, total_time):
+        self.metrics["total_time"] = total_time
 
 
-def runAll_optimized(instancesDir, outDir, planners):
-    outData=[["file_name","planner","learn_algorithm","pBug","pValid","tests","index","precision","recall","steps", "time", "repr" ]]
-    outfile=os.path.join(outDir,"planningMED.csv")
-    for f in glob.glob(os.path.join(instancesDir,"*.txt")):
-        print f
-        learn_alg,pBug,pValid,tests,index=Planning_Results.instance_name_to_meta(os.path.basename(f))
-        file=os.path.join(instancesDir,f)
-        ei = sfl_diagnoser.Diagnoser.diagnoserUtils.readPlanningFile(file)
-        for name,alg in planners:
-            try:
-                precision, recall, steps, total_time, rpr = get_results_from_mdp(ei, alg)
-                outData.append([os.path.basename(f), name,learn_alg,pBug,pValid,tests,index,precision,recall,steps,total_time, rpr])
-                writer=csv.writer(open(outfile,"wb"))
-                writer.writerows(outData)
-            except:
-                pass
+class AbstractPlanner(object):
+    def __init__(self):
+        self.partial_metrics = dict()
+        self.metrics = None
 
-def mcts_by_approach(approach, iterations):
-    def approached_mcts(ei):
-        return Planner.mcts.main.main_mcts(ei, approach, iterations)
-    return approached_mcts
+    # @timeout(3600)
+    def plan(self, ei):
+        # sfl_diagnoser.Diagnoser.ExperimentInstance.Instances_Management().clear()
+        gc.collect()
+        steps = 0
+        start = time.time()
+        self.partial_metrics[steps] = Metrics(ei, steps)
+        while not self.stop_criteria(ei):
+            gc.collect()
+            ei = ei.addTests(self._plan(ei))
+            steps += 1
+            self.partial_metrics[steps] = Metrics(ei, steps).get_metrics()
+        self.metrics = Metrics(ei, steps)
+        self.metrics.add_time(time.time() - start)
 
-def lrtdp_by_approach(epsilonArg, iterations, greedy_action_treshold, approachArg):
-    def approached_lrtdp(ei):
-        sfl_diagnoser.Planner.lrtdp.LRTDPModule.setVars(ei, epsilonArg, iterations, greedy_action_treshold, approachArg)
-        return sfl_diagnoser.Planner.lrtdp.LRTDPModule.lrtdp()
-    return approached_lrtdp
+    def stop_criteria(self, ei):
+        PROBABILITY_STOP = 0.7
+        ei.diagnose()
+        return ei.getMaxProb() > PROBABILITY_STOP or len(ei.get_optionals_actions()) == 0
 
-def entropy_by_threshold(threshold):
-    return lambda ei: HP_Random.main_entropy(ei, threshold=threshold)
+    def _plan(self, ei):
+        return choice(ei.get_optionals_actions())
 
-def entropy_by_batch(batch):
-    return lambda ei: HP_Random.main_entropy(ei, batch=batch)
+    def get_name(self):
+        return self.__class__.__name__
 
-def planning_for_project(dir):
-    for d in os.listdir(dir):
-        if "." in d:
-            continue
-        if d=="weka":
-            continue
-        experiment_dir = os.path.join(dir,d)
-        in_dir = os.path.join(experiment_dir,"planner")
-        out_dir = os.path.join(experiment_dir,"all_planners")
-        mkOneDir(out_dir)
-        planners = [#("mcts_hp", mcts_by_approach("hp", 200)), ("mcts_entropy", mcts_by_approach("entropy", 200)),
-                    # ("lrtdp_hp", lrtdp_by_approach(0, 200, "hp")),
-                    ("mcts_hp_100", mcts_by_approach("hp", 100)),
-                    ("mcts_hp_70", mcts_by_approach("hp", 70)),
-                    ("mcts_hp_50", mcts_by_approach("hp", 50)),
-                    ("mcts_hp_10", mcts_by_approach("hp", 10)),
-                    ("mcts_hp_5", mcts_by_approach("hp", 5)),
-                    # ("lrtdp_entropy", lrtdp_by_approach(0, 200, "entropy")),
-                    # ("entropy_0.8", entropy_by_threshold(0.8)),
-                    # ("entropy_0.6", entropy_by_threshold(0.6)),
-                    # ("entropy_0.4", entropy_by_threshold(0.4)),
-                    # ("entropy_0.2", entropy_by_threshold(0.2)),
-                    # ("entropy_batch_2", entropy_by_batch(2)),
-                    # ("entropy_batch_5", entropy_by_batch(5)),
-                    ("HP", HP_Random.main_HP), ("entropy", HP_Random.main_entropy),
-                    ("Random", HP_Random.main_Random), ("initials", HP_Random.only_initials),
-                    ("all_tests", HP_Random.all_tests)]
-        runAll_optimized(in_dir, out_dir, planners)
 
-def test():
-    ei = sfl_diagnoser.Diagnoser.diagnoserUtils.readPlanningFile(r"C:\Temp\ant_bug\100_uniform_0.txt")
-    print ei.calc_precision_recall()
-    planners = [ # ("lrtdp_hp_0.3", lrtdp_by_approach(1, 10, 0.3, "hp")),
-                 # ("lrtdp_hp_0.7", lrtdp_by_approach(1, 10, 0.7, "hp")),
-                 ("lrtdp_hp_0.1", lrtdp_by_approach(1, 10, 0.1, "hp")),
-                 #("mcts_hp_50", mcts_by_approach("hp", 50)),
-                # ("mcts_hp_10", mcts_by_approach("hp", 200)),
-                #("mcts_hp_5", mcts_by_approach("hp", 5)),
-                # ("mcts_entropy", mcts_by_approach("entropy", 5)),
-                ("HP", HP_Random.main_HP),
-                # ("entropy_0.6", entropy_by_threshold(0.6)),
-                # ("entropy_0.4", entropy_by_threshold(0.4)),
-                # ("entropy_0.2", entropy_by_threshold(0.2)),
-                # ("entropy_batch_2", entropy_by_batch(2)),
-                # ("entropy_batch_5", entropy_by_batch(5)),
-                # ("entropy", HP_Random.main_entropy),
-                # ("Random", HP_Random.main_Random), ("initials", HP_Random.only_initials),
-                ("all_tests", HP_Random.all_tests)]
-    for name, alg in reversed(planners):
-        print name
-        print get_results_from_mdp(ei,alg)
+class MCTSPlanner(AbstractPlanner):
+    def __init__(self, approach, iterations):
+        super(MCTSPlanner, self).__init__()
+        self.approach, self.iterations = approach, iterations
+
+    def plan(self, ei):
+        clear_states()
+        super(MCTSPlanner, self).plan(ei)
+
+    def _plan(self, ei):
+        action, weight = mcts_uct(ei, self.iterations, self.approach)
+        return action
+
+    def get_name(self):
+        return "_".join(map(str, [self.__class__.__name__, self.approach, self.iterations]))
+
+
+class InitialsPlanner(AbstractPlanner):
+    def stop_criteria(self, ei):
+        return True
+
+
+class HPPlanner(AbstractPlanner):
+    def _plan(self, ei):
+        return ei.hp_next()
+
+
+class LRTDPPlanner(AbstractPlanner):
+    def __init__(self, approach="uniform", iterations=1, greedy_action_treshold=1, epsilon=0.001):
+        super(LRTDPPlanner, self).__init__()
+        self.approach = approach
+        self.iterations = iterations
+        self.greedy_action_treshold = greedy_action_treshold
+        self.epsilon = epsilon
+
+    def plan(self, ei):
+        sfl_diagnoser.Planner.lrtdp.LRTDPModule.Lrtdp.clear()
+        super(LRTDPPlanner, self).plan(ei)
+
+    def _plan(self, ei):
+        return sfl_diagnoser.Planner.lrtdp.LRTDPModule.Lrtdp(ei, epsilon=self.epsilon, iterations=self.iterations,
+                                                             greedy_action_treshold=self.greedy_action_treshold, approach=self.approach).lrtdp()
+
+    def get_name(self):
+        return "_".join(map(str, [self.__class__.__name__, self.approach, self.iterations]))
+
+
+class EntropyPlanner(AbstractPlanner):
+    def __init__(self, threshold = 1.2, batch=1):
+        super(EntropyPlanner, self).__init__()
+        self.threshold = threshold
+        self.batch = batch
+
+    def _plan(self, ei):
+        return ei.entropy_next(self.threshold, self.batch)
+
+
+class ALLTestsPlanner(AbstractPlanner):
+    def stop_criteria(self, ei):
+        return len(ei.get_optionals_actions()) == 0
+
+
+class PlannerExperiment(object):
+    def __init__(self, planning_file):
+        self.planning_file = planning_file
+        self.planners = PlannerExperiment.get_planners()
+
+    def experiment(self):
+        for planner in self.planners:
+            print planner.get_name()
+            planner.plan(sfl_diagnoser.Diagnoser.diagnoserUtils.read_json_planning_file(self.planning_file))
+
+    @staticmethod
+    def get_planners():
+        return [InitialsPlanner(), ALLTestsPlanner(), AbstractPlanner(), HPPlanner(), EntropyPlanner()] + \
+               map(lambda x: LRTDPPlanner("entropy", x), range(1, 20)) + map(lambda x: MCTSPlanner("entropy", x), range(1, 20)) + map(lambda x: MCTSPlanner("hp", x), range(1, 20)) + map(lambda x: LRTDPPlanner("hp", x), range(1, 20))
+               # map(lambda x: MCTSPlanner("entropy", x * 10), range(1, 20)) + \
+               # map(lambda x: MCTSPlanner("hp", x*10), range(1, 20))+ \
+               # map(lambda x: LRTDPPlanner("entropy", x * 10), range(1, 20)) + \
+               # map(lambda x: LRTDPPlanner("hp", x*10), range(1, 20))
+
+    def get_results(self):
+        metrics = {}
+        for planner in self.planners:
+            metrics[planner.get_name()] = planner.metrics.metrics
+        return metrics
+
+    def get_partial_results(self):
+        metrics = {}
+        for planner in self.planners:
+            metrics[planner.get_name()] = planner.partial_metrics
+        return metrics
 
 
 if __name__ == "__main__":
-    pass
-    # print a(ei.Copy())
-    #check_lrtdp("","")
-    #lrtdp_multi_check("C:\projs\lrtdp\instances2", "C:\projs\lrtdp\planners8")
-    # check_all_planners("C:\projs\lrtdp\instances3", "C:\projs\planners_check")
-    # ei = Diagnoser.diagnoserUtils.readPlanningFile(r"C:\projs\lrtdp\instances\40_uniform_8.txt")
-    # for i in xrange(35):
-    #     ei.addTest(i)
-    # print ei.initial_tests
-    # print ei.calc_precision_recall()
-    # inDir="C:\\projs\\planningTry\\in"
-    # outDir="C:\\projs\\planningTry\\out"
-    # runAll(inDir,outDir)
-
-    # path=""
-    # for x in ["cdt","orient","ant","poi"]:
-    #     planning_for_project(os.path.join(path,x))
+    pe = PlannerExperiment(r"C:\temp\47")
+    pe.experiment()
+    print pe.get_results()
