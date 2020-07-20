@@ -4,7 +4,7 @@
 
 import numpy
 
-from sfl.Diagnoser.Experiment_Data import Experiment_Data
+from .sfl.Diagnoser.Experiment_Data import Experiment_Data
 
 
 def pass_probability(ei):

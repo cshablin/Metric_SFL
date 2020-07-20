@@ -1,5 +1,5 @@
-from sfl.Diagnoser import BarinelOptimize
-from sfl.Diagnoser.FullMatrix import FullMatrix
+from .sfl.Diagnoser import BarinelOptimize
+from .sfl.Diagnoser.FullMatrix import FullMatrix
 
 
 class FullMatrixOptimize(FullMatrix):

@@ -1,1 +1,1 @@
-from sfl import *
+from .sfl import Diagnoser

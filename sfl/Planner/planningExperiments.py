@@ -15,7 +15,7 @@ from sfl.Planner.mcts.mcts import mcts_uct, clear_states
 
 import sfl.Diagnoser.diagnoserUtils
 import sfl.Diagnoser.ExperimentInstance
-from sfl.Diagnoser.Diagnosis_Results import Diagnosis_Results
+from .sfl.Diagnoser.Diagnosis_Results import Diagnosis_Results
 
 
 def timeout(timeout):
@@ -71,7 +71,7 @@ class AbstractPlanner(object):
 
     # @timeout(3600)
     def plan(self, ei):
-        # sfl.Diagnoser.ExperimentInstance.Instances_Management().clear()
+        # .sfl.Diagnoser.ExperimentInstance.Instances_Management().clear()
         gc.collect()
         steps = 0
         start = time.time()
@@ -166,7 +166,7 @@ class PlannerExperiment(object):
     def experiment(self):
         for planner in self.planners:
             print planner.get_name()
-            planner.plan(sfl.Diagnoser.diagnoserUtils.read_json_planning_file(self.planning_file))
+            planner.plan(.sfl.Diagnoser.diagnoserUtils.read_json_planning_file(self.planning_file))
 
     @staticmethod
     def get_planners():

@@ -1,5 +1,5 @@
-from sfl.Diagnoser import BarinelInfluence
-from sfl.Diagnoser.FullMatrix import FullMatrix
+from .sfl.Diagnoser import BarinelInfluence
+from .sfl.Diagnoser.FullMatrix import FullMatrix
 
 
 class FullMatrixInfluence(FullMatrix):

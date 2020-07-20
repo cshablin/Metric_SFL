@@ -19,11 +19,11 @@ def main_HP(ei,status):
     ei.diagnose()
     while not (ei.isTerminal() or ei.AllTestsReached() or len(list_recall) > 150):
         if status == 1:
-            ei = sfl.Diagnoser.ExperimentInstance.addTests(ei, ei.hp_next())
+            ei = .sfl.Diagnoser.ExperimentInstance.addTests(ei, ei.hp_next())
         elif status == 2:
-            ei = sfl.Diagnoser.ExperimentInstance.addTests(ei, ei.hp_next_by_prob())
+            ei = .sfl.Diagnoser.ExperimentInstance.addTests(ei, ei.hp_next_by_prob())
         elif status == 3:
-            ei = sfl.Diagnoser.ExperimentInstance.addTests(ei, ei.random_next())
+            ei = .sfl.Diagnoser.ExperimentInstance.addTests(ei, ei.random_next())
         steps = steps + 1
         precision, recall = ei.calc_precision_recall()
         list_recall.append(recall)
@@ -64,7 +64,7 @@ def main_entropy(ei, *args, **kwargs):
 
 if __name__=="__main__":
     file = r"C:\projs\lrtdp\instances\40_uniform_8.txt"
-    ei= sfl.Diagnoser.diagnoserUtils.readPlanningFile(file)
+    ei= .sfl.Diagnoser.diagnoserUtils.readPlanningFile(file)
     print main_Random(ei)
     print main_HP(ei)
     print main_entropy(ei)

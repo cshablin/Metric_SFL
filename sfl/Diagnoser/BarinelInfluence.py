@@ -3,7 +3,7 @@ __author__ = 'amir'
 import csv
 import math
 import sys
-from sfl.Diagnoser import Barinel
+from .sfl.Diagnoser import Barinel
 
 import Diagnosis
 import Staccato

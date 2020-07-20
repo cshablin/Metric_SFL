@@ -4,7 +4,7 @@ from sfl.Planner.pomcp import EXPERIMENTPARAMS
 
 __author__ = 'amir'
 
-import sfl.Diagnoser.diagnoserUtils
+from .sfl.Diagnoser import diagnoserUtils
 
 def main():
     searchParams= MCTSPARAMS.MCTSPARAMS()#MCTS::PARAMS
@@ -25,7 +25,7 @@ def main():
     #simulator =NETWORK.NETWORK(size, number)#
     #
     file="C:\projs\\40_weka_randomForest9.txt"
-    ei= sfl.Diagnoser.diagnoserUtils.readPlanningFile(file)
+    ei= .sfl.Diagnoser.diagnoserUtils.readPlanningFile(file)
 
     real = DIAGNOSER.DIAGNOSER(ei, 0.7)#
     simulator = DIAGNOSER.DIAGNOSER(ei.Copy(), 0.7)#

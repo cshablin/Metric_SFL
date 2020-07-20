@@ -4,11 +4,10 @@ import random
 from math import ceil
 import Diagnosis
 import sfl.Diagnoser.dynamicSpectrumInfluence
-from sfl.Diagnoser.Experiment_Data import Experiment_Data
-import sfl.Planner.domain_knowledge
+from .sfl.Diagnoser.Experiment_Data import Experiment_Data
 import numpy
 import sfl.Diagnoser.diagnoserUtils
-from sfl.Diagnoser.Singelton import Singleton
+from .sfl.Diagnoser.Singelton import Singleton
 import sfl.Diagnoser.ExperimentInstance
 
 TERMINAL_PROB = 0.7
@@ -31,7 +30,7 @@ class ExperimentInstanceInfluence(sfl.Diagnoser.ExperimentInstance.ExperimentIns
                 "wrong value of influence information of test {0}".format(test)
 
     def initials_to_DS(self):
-        ds = sfl.Diagnoser.dynamicSpectrumInfluence.DynamicSpectrumInfluence()
+        ds = .sfl.Diagnoser.dynamicSpectrumInfluence.DynamicSpectrumInfluence()
         ds.setTestsComponents(copy.deepcopy([Experiment_Data().POOL[test] for test in self.get_initials()]))
         ds.setprobabilities(list(Experiment_Data().PRIORS))
         ds.seterror([self.get_error()[test] for test in self.get_initials()])

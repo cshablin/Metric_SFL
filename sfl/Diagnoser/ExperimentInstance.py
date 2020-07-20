@@ -4,10 +4,9 @@ import random
 from math import ceil
 import Diagnosis
 import sfl.Diagnoser.dynamicSpectrum
-from sfl.Diagnoser.Experiment_Data import Experiment_Data
-import sfl.Planner.domain_knowledge as domain_knowledge
+from .sfl.Diagnoser.Experiment_Data import Experiment_Data
 import numpy
-from sfl.Diagnoser.Singelton import Singleton
+from .sfl.Diagnoser.Singelton import Singleton
 
 TERMINAL_PROB = 0.7
 
@@ -30,7 +29,7 @@ class ExperimentInstance(object):
         return ds
 
     def _create_ds(self):
-        return sfl.Diagnoser.dynamicSpectrum.dynamicSpectrum()
+        return .sfl.Diagnoser.dynamicSpectrum.dynamicSpectrum()
 
     def get_optionals_actions(self):
         optionals = [x for x in Experiment_Data().POOL if x not in self.get_initials()]
@@ -133,6 +132,7 @@ class ExperimentInstance(object):
         return optionals, probabilities
 
     def next_tests_by_entropy(self, threshold = 1.0):
+        import sfl.Planner.domain_knowledge as domain_knowledge
         """
         order by InfoGain using entropy
         return tests and probabilities

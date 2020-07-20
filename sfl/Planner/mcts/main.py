@@ -18,7 +18,7 @@ def main_mcts(ei, approach, iterations=DEFAULT_BUDGET):
 
 
 def test_mcts(f):
-    instance = sfl.Diagnoser.diagnoserUtils.readPlanningFile(f)
+    instance = .sfl.Diagnoser.diagnoserUtils.readPlanningFile(f)
     return main_mcts(instance)
 
 
