@@ -1,4 +1,4 @@
-from .sfl.Diagnoser.Singelton import Singleton
+from .Diagnoser.Singelton import Singleton
 
 
 class Experiment_Data(object):

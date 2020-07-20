@@ -1,5 +1,5 @@
 import sfl.Diagnoser
-from .sfl.Diagnoser.FullMatrix import FullMatrix
+from .Diagnoser.FullMatrix import FullMatrix
 
 
 class dynamicSpectrum(object):

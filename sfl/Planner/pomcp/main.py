@@ -4,7 +4,7 @@ from sfl.Planner.pomcp import EXPERIMENTPARAMS
 
 __author__ = 'amir'
 
-from .sfl.Diagnoser import diagnoserUtils
+from .Diagnoser import diagnoserUtils
 
 def main(ei):
     searchParams= MCTSPARAMS.MCTSPARAMS()#MCTS::PARAMS

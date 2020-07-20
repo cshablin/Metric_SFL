@@ -1,7 +1,7 @@
 import sfl.Diagnoser.ExperimentInstance
 import sfl.Diagnoser.ExperimentInstanceFactory
-from .sfl.Diagnoser.FullMatrix import FullMatrix
-from .sfl.Diagnoser.Experiment_Data import Experiment_Data
+from .Diagnoser.FullMatrix import FullMatrix
+from .Diagnoser.Experiment_Data import Experiment_Data
 
 __author__ = 'amir'
 

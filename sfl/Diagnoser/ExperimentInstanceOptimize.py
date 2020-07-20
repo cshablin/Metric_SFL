@@ -4,10 +4,10 @@ import random
 from math import ceil
 import Diagnosis
 import sfl.Diagnoser.dynamicSpectrumOptimize
-from .sfl.Diagnoser.Experiment_Data import Experiment_Data
+from .Diagnoser.Experiment_Data import Experiment_Data
 import numpy
 import sfl.Diagnoser.diagnoserUtils
-from .sfl.Diagnoser.Singelton import Singleton
+from .Diagnoser.Singelton import Singleton
 import sfl.Diagnoser.ExperimentInstance
 
 TERMINAL_PROB = 0.7

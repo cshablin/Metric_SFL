@@ -15,7 +15,7 @@ from sfl.Planner.mcts.mcts import mcts_uct, clear_states
 
 import sfl.Diagnoser.diagnoserUtils
 import sfl.Diagnoser.ExperimentInstance
-from .sfl.Diagnoser.Diagnosis_Results import Diagnosis_Results
+from .Diagnoser.Diagnosis_Results import Diagnosis_Results
 
 
 def timeout(timeout):

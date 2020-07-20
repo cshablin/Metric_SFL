@@ -1,8 +1,8 @@
-from .sfl.Diagnoser.diagnoserUtils import readPlanningFile, write_planning_file, write_merged_matrix
-# from .sfl.Diagnoser.diagnoserUtils import readPlanningFile, write_planning_file, write_merged_matrix
-from .sfl.Diagnoser.Diagnosis_Results import Diagnosis_Results
+from .Diagnoser.diagnoserUtils import readPlanningFile, write_planning_file, write_merged_matrix
+# from .Diagnoser.diagnoserUtils import readPlanningFile, write_planning_file, write_merged_matrix
+from .Diagnoser.Diagnosis_Results import Diagnosis_Results
 
-from .sfl.Diagnoser.diagnoserUtils import readPlanningFile, \
+from .Diagnoser.diagnoserUtils import readPlanningFile, \
     write_json_planning_file, \
     write_json_planning_file_by_ei, read_json_planning_file
 
@@ -59,8 +59,8 @@ def abstraction():
 
 
 if __name__ == "__main__":
-    # from .sfl.Diagnoser.diagnoserUtils import readPlanningFile
-    # from .sfl.Diagnoser.Diagnosis_Results import Diagnosis_Results
+    # from .Diagnoser.diagnoserUtils import readPlanningFile
+    # from .Diagnoser.Diagnosis_Results import Diagnosis_Results
     # import sfl.Diagnoser.ExperimentInstance
     #
     # inst = readPlanningFile(r"C:\Users\User\Downloads\inputMatrix6_amir.txt")

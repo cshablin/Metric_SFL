@@ -4,9 +4,9 @@ import random
 from math import ceil
 import Diagnosis
 import sfl.Diagnoser.dynamicSpectrum
-from .sfl.Diagnoser.Experiment_Data import Experiment_Data
+from .Diagnoser.Experiment_Data import Experiment_Data
 import numpy
-from .sfl.Diagnoser.Singelton import Singleton
+from .Diagnoser.Singelton import Singleton
 
 TERMINAL_PROB = 0.7
 

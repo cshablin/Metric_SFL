@@ -1,5 +1,5 @@
 import sfl.Diagnoser
-from .sfl.Diagnoser.FullMatrixOptimize import FullMatrixOptimize
+from .Diagnoser.FullMatrixOptimize import FullMatrixOptimize
 import sfl.Diagnoser.dynamicSpectrum
 from functools import partial
 

@@ -1,5 +1,5 @@
-from .sfl.Diagnoser.diagnoserUtils import readPlanningFile
-from .sfl.Diagnoser.Diagnosis_Results import Diagnosis_Results
+from .Diagnoser.diagnoserUtils import readPlanningFile
+from .Diagnoser.Diagnosis_Results import Diagnosis_Results
 import sfl.Diagnoser.ExperimentInstance
 
 

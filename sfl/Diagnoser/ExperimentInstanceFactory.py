@@ -1,7 +1,7 @@
 import sfl.Diagnoser.ExperimentInstance
 import sfl.Diagnoser.ExperimentInstanceInfluence
 import sfl.Diagnoser.ExperimentInstanceOptimize
-from .sfl.Diagnoser.Experiment_Data import Experiment_Data
+from .Diagnoser.Experiment_Data import Experiment_Data
 
 
 class ExperimentInstanceFactory(object):

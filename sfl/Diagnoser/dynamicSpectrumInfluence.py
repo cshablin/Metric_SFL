@@ -1,5 +1,5 @@
 import sfl.Diagnoser
-from .sfl.Diagnoser.FullMatrixInfluence import FullMatrixInfluence
+from .Diagnoser.FullMatrixInfluence import FullMatrixInfluence
 import sfl.Diagnoser.dynamicSpectrum
 from functools import partial
 

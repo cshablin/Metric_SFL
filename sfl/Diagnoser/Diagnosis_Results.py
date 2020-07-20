@@ -1,5 +1,5 @@
-from .sfl.Diagnoser.Experiment_Data import Experiment_Data
-from .sfl.Diagnoser.Ochiai_Rank import Ochiai_Rank
+from .Diagnoser.Experiment_Data import Experiment_Data
+from .Diagnoser.Ochiai_Rank import Ochiai_Rank
 from scipy.stats import entropy
 from collections import Counter
 import numpy as np
