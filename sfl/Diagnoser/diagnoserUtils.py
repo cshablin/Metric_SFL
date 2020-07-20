@@ -1,6 +1,6 @@
-from .Diagnoser.ExperimentInstanceFactory import ExperimentInstanceFactory
-from .Diagnoser.FullMatrix import FullMatrix
-from .Diagnoser.Experiment_Data import Experiment_Data
+from .ExperimentInstanceFactory import ExperimentInstanceFactory
+from .FullMatrix import FullMatrix
+from .Experiment_Data import Experiment_Data
 
 __author__ = 'amir'
 
