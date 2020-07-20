@@ -166,7 +166,7 @@ class PlannerExperiment(object):
     def experiment(self):
         for planner in self.planners:
             print planner.get_name()
-            planner.plan(.sfl.Diagnoser.diagnoserUtils.read_json_planning_file(self.planning_file))
+            planner.plan(sfl.Diagnoser.diagnoserUtils.read_json_planning_file(self.planning_file))
 
     @staticmethod
     def get_planners():

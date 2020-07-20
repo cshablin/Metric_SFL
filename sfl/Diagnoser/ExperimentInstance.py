@@ -29,7 +29,7 @@ class ExperimentInstance(object):
         return ds
 
     def _create_ds(self):
-        return .sfl.Diagnoser.dynamicSpectrum.dynamicSpectrum()
+        return sfl.Diagnoser.dynamicSpectrum.dynamicSpectrum()
 
     def get_optionals_actions(self):
         optionals = [x for x in Experiment_Data().POOL if x not in self.get_initials()]

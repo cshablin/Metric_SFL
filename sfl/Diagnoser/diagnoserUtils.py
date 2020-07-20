@@ -131,7 +131,7 @@ def read_json_planning_instance(instance):
     priors = instance.get('priors', [0.1 for _ in components])
     Experiment_Data().set_values(priors, instance['bugs'], testsPool, components, estimatedTestsPool)
     map(lambda x: setattr(Experiment_Data(), x[0], x[1]), instance.items())
-    return .sfl.Diagnoser.ExperimentInstanceFactory.ExperimentInstanceFactory.get_experiment_instance(instance['initial_tests'], error, experiment_type)
+    return Diagnoser.ExperimentInstanceFactory.ExperimentInstanceFactory.get_experiment_instance(instance['initial_tests'], error, experiment_type)
 
 
 def write_json_planning_file(out_path, tests_details, bugs=None, initial_tests=None, **kwargs):

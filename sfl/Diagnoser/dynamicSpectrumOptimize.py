@@ -4,7 +4,7 @@ import sfl.Diagnoser.dynamicSpectrum
 from functools import partial
 
 
-class dynamicSpectrumOptimize(.sfl.Diagnoser.dynamicSpectrum.dynamicSpectrum):
+class dynamicSpectrumOptimize(sfl.Diagnoser.dynamicSpectrum.dynamicSpectrum):
     def __init__(self):
         super(dynamicSpectrumOptimize, self).__init__()
 

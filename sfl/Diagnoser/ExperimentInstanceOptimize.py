@@ -36,12 +36,12 @@ class Instances_Management(object):
         return ExperimentInstanceOptimize(eval(initial), error)
 
 
-class ExperimentInstanceOptimize(.sfl.Diagnoser.ExperimentInstance.ExperimentInstance):
+class ExperimentInstanceOptimize(sfl.Diagnoser.ExperimentInstance.ExperimentInstance):
     def __init__(self, initial_tests, error):
         super(ExperimentInstanceOptimize, self).__init__(initial_tests, error)
 
     def _create_ds(self):
-        return .sfl.Diagnoser.dynamicSpectrumOptimize.dynamicSpectrumOptimize()
+        return sfl.Diagnoser.dynamicSpectrumOptimize.dynamicSpectrumOptimize()
 
     def create_instance(self, initial_tests, error):
         return Instances_Management().get_instance(initial_tests, error)
