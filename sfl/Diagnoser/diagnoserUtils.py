@@ -37,7 +37,7 @@ def readPlanningFile(fileName, delimiter=";"):
         testsPool[ind] = actualTrace
         error[ind] = err
     Experiment_Data().set_values(priors, bugs, testsPool, components, estimatedTestsPool)
-    return .sfl.Diagnoser.ExperimentInstanceFactory.ExperimentInstanceFactory.get_experiment_instance(initials, error)
+    return sfl.Diagnoser.ExperimentInstanceFactory.ExperimentInstanceFactory.get_experiment_instance(initials, error)
 
 
 
