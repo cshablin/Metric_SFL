@@ -1,15 +1,15 @@
-from .Diagnoser.diagnoserUtils import readPlanningFile
-from .Diagnoser.Diagnosis_Results import Diagnosis_Results
-from operator import itemgetter
-import sfl.Diagnoser.Experiment_Data
-import sfl.Diagnoser.ExperimentInstance
-import sfl.Planner.HP_Random
-import timeit
-import time
-import os
 
 
 def run_dignose_eyal(bug_id, results_file, additional_files_path):
+    from .Diagnoser.diagnoserUtils import readPlanningFile
+    from .Diagnoser.Diagnosis_Results import Diagnosis_Results
+    from operator import itemgetter
+    import sfl.Diagnoser.Experiment_Data
+    import sfl.Diagnoser.ExperimentInstance
+    import sfl.Planner.HP_Random
+    import timeit
+    import time
+    import os
     print("Start diagnose")
     start = time.time()
     os.remove(results_file)
