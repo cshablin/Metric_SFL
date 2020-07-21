@@ -1,4 +1,3 @@
-import sfl.Diagnoser
 from .Diagnoser.FullMatrix import FullMatrix
 
 
