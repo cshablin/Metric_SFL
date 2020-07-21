@@ -1,10 +1,9 @@
-import sfl.Diagnoser
 from .FullMatrixOptimize import FullMatrixOptimize
-import sfl.Diagnoser.dynamicSpectrum
+from .dynamicSpectrum import dynamicSpectrum
 from functools import partial
 
 
-class dynamicSpectrumOptimize(sfl.Diagnoser.dynamicSpectrum.dynamicSpectrum):
+class dynamicSpectrumOptimize(dynamicSpectrum):
     def __init__(self):
         super(dynamicSpectrumOptimize, self).__init__()
 
