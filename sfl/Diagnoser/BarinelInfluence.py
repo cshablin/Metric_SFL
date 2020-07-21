@@ -3,13 +3,14 @@ __author__ = 'amir'
 import csv
 import math
 import sys
-from .Diagnoser import Barinel
+from .Barinel import Barinel
 
 import Diagnosis
 import Staccato
 import TFInfluence
 
-class BarinelInfluence(Barinel.Barinel):
+
+class BarinelInfluence(Barinel):
 
     def __init__(self):
         super(BarinelInfluence, self).__init__()

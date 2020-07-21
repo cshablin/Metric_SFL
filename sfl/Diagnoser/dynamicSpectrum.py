@@ -1,4 +1,4 @@
-from .Diagnoser.FullMatrix import FullMatrix
+from .FullMatrix import FullMatrix
 
 
 class dynamicSpectrum(object):

@@ -1,4 +1,4 @@
-from .Diagnoser.Singelton import Singleton
+from .Singelton import Singleton
 
 
 class Experiment_Data(object):

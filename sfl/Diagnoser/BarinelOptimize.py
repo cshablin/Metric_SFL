@@ -3,14 +3,14 @@ __author__ = 'amir'
 import csv
 import math
 import sys
-from .Diagnoser import Barinel
+from .Barinel import Barinel
 
 import DiagnosisOptimize
 import Staccato
 import TFOptimize
 
 
-class BarinelOptimize(Barinel.Barinel):
+class BarinelOptimize(Barinel):
 
     def __init__(self):
         super(BarinelOptimize, self).__init__()

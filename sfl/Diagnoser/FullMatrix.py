@@ -1,4 +1,4 @@
-from .Diagnoser import Barinel
+from .Barinel import Barinel
 
 
 class FullMatrix(object):
@@ -14,7 +14,7 @@ class FullMatrix(object):
         return bar.run()
 
     def _create_barinel(self):
-        return Barinel.Barinel()
+        return Barinel()
 
     def save_to_csv_file(self, out_file):
         import csv

@@ -4,9 +4,9 @@ import random
 from math import ceil
 import Diagnosis
 from .dynamicSpectrumOptimize import dynamicSpectrumOptimize
-from .Diagnoser.Experiment_Data import Experiment_Data
+from .Experiment_Data import Experiment_Data
 import numpy
-from .Diagnoser.Singelton import Singleton
+from .Singelton import Singleton
 from .ExperimentInstance import ExperimentInstance
 
 TERMINAL_PROB = 0.7

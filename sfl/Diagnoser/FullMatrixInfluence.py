@@ -1,5 +1,5 @@
-from .Diagnoser import BarinelInfluence
-from .Diagnoser.FullMatrix import FullMatrix
+from .BarinelInfluence import BarinelInfluence
+from .FullMatrix import FullMatrix
 
 
 class FullMatrixInfluence(FullMatrix):
@@ -15,7 +15,7 @@ class FullMatrixInfluence(FullMatrix):
         self.influence_alpha = alpha
 
     def diagnose(self):
-        bar = BarinelInfluence.BarinelInfluence()
+        bar = BarinelInfluence()
         bar.set_matrix_error(self.matrix,self.error)
         bar.set_prior_probs(self.probabilities)
         bar.set_influence_matrix(self.influence_matrix)

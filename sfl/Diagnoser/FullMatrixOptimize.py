@@ -1,5 +1,5 @@
-from .Diagnoser import BarinelOptimize
-from .Diagnoser.FullMatrix import FullMatrix
+from .BarinelOptimize import BarinelOptimize
+from .FullMatrix import FullMatrix
 
 
 class FullMatrixOptimize(FullMatrix):
@@ -7,7 +7,7 @@ class FullMatrixOptimize(FullMatrix):
         super(FullMatrixOptimize, self).__init__()
 
     def _create_barinel(self):
-        return BarinelOptimize.BarinelOptimize()
+        return BarinelOptimize()
 
     def _create_full_matirx(self):
         return FullMatrixOptimize()

@@ -1,4 +1,4 @@
-from .Diagnoser.FullMatrixInfluence import FullMatrixInfluence
+from .FullMatrixInfluence import FullMatrixInfluence
 from .dynamicSpectrum import dynamicSpectrum
 from functools import partial
 

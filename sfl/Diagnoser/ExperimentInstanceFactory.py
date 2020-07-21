@@ -1,7 +1,7 @@
 from .ExperimentInstance import ExperimentInstance
 from .ExperimentInstanceInfluence import ExperimentInstanceInfluence
 from .ExperimentInstanceOptimize import ExperimentInstanceOptimize
-from .Diagnoser.Experiment_Data import Experiment_Data
+from .Experiment_Data import Experiment_Data
 
 
 class ExperimentInstanceFactory(object):
