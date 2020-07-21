@@ -13,7 +13,7 @@ class ExperimentInstanceFactory(object):
 
     @staticmethod
     def get_experiment_instance(initials, error, experiment_type='normal'):
-        classes = {'normal': .sfl.Diagnoser.ExperimentInstance.ExperimentInstance,
-                   'influence': .sfl.Diagnoser.ExperimentInstanceInfluence.ExperimentInstanceInfluence,
-                   'optimize': .sfl.Diagnoser.ExperimentInstanceOptimize.Instances_Management().get_instance}
+        classes = {'normal': sfl.Diagnoser.ExperimentInstance.ExperimentInstance,
+                   'influence': sfl.Diagnoser.ExperimentInstanceInfluence.ExperimentInstanceInfluence,
+                   'optimize': sfl.Diagnoser.ExperimentInstanceOptimize.Instances_Management().get_instance}
         return classes.get(experiment_type, classes['normal'])(initials, error)
