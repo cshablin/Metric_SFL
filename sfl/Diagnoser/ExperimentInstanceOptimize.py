@@ -3,12 +3,11 @@ import math
 import random
 from math import ceil
 import Diagnosis
-import sfl.Diagnoser.dynamicSpectrumOptimize
+from .dynamicSpectrumOptimize import dynamicSpectrumOptimize
 from .Diagnoser.Experiment_Data import Experiment_Data
 import numpy
-import sfl.Diagnoser.diagnoserUtils
 from .Diagnoser.Singelton import Singleton
-import sfl.Diagnoser.ExperimentInstance
+from .ExperimentInstance import ExperimentInstance
 
 TERMINAL_PROB = 0.7
 
@@ -36,12 +35,12 @@ class Instances_Management(object):
         return ExperimentInstanceOptimize(eval(initial), error)
 
 
-class ExperimentInstanceOptimize(sfl.Diagnoser.ExperimentInstance.ExperimentInstance):
+class ExperimentInstanceOptimize(ExperimentInstance):
     def __init__(self, initial_tests, error):
         super(ExperimentInstanceOptimize, self).__init__(initial_tests, error)
 
     def _create_ds(self):
-        return sfl.Diagnoser.dynamicSpectrumOptimize.dynamicSpectrumOptimize()
+        return dynamicSpectrumOptimize()
 
     def create_instance(self, initial_tests, error):
         return Instances_Management().get_instance(initial_tests, error)
