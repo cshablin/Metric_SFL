@@ -3,7 +3,7 @@ import math
 import random
 from math import ceil
 import Diagnosis
-import sfl.Diagnoser.dynamicSpectrum
+from .dynamicSpectrum import dynamicSpectrum
 from .Diagnoser.Experiment_Data import Experiment_Data
 import numpy
 from .Diagnoser.Singelton import Singleton
@@ -29,7 +29,7 @@ class ExperimentInstance(object):
         return ds
 
     def _create_ds(self):
-        return sfl.Diagnoser.dynamicSpectrum.dynamicSpectrum()
+        return dynamicSpectrum()
 
     def get_optionals_actions(self):
         optionals = [x for x in Experiment_Data().POOL if x not in self.get_initials()]
