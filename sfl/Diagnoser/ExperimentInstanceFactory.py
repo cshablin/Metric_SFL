@@ -14,6 +14,6 @@ class ExperimentInstanceFactory(object):
     @staticmethod
     def get_experiment_instance(initials, error, experiment_type='normal'):
         classes = {'normal': ExperimentInstance,
-                   'influence': ExperimentInstanceInfluence,
-                   'optimize': ExperimentInstanceOptimize.Instances_Management().get_instance}
+                   'influence': ExperimentInstanceInfluence}
+                   #, 'optimize': ExperimentInstanceOptimize.Instances_Management().get_instance}
         return classes.get(experiment_type, classes['normal'])(initials, error)
