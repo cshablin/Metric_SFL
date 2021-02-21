@@ -6,6 +6,7 @@ __author__ = 'amir'
 
 import csv
 import json
+from functools import reduce
 
 def readPlanningFile(fileName, delimiter=";"):
     lines=open(fileName,"r").readlines()
@@ -64,15 +65,15 @@ def write_planning_file(out_path,
     full_tests_details = []
     if len(tests_details[0]) == 3:
         for name, trace, outcome in tests_details:
-            full_tests_details.append((name, sorted(map(lambda comp: map_component_id[comp] , trace), key=lambda x:x), outcome))
+            full_tests_details.append((name, sorted(list(map(lambda comp: map_component_id[comp] , trace), key=lambda x:x)), outcome))
     else:
         for name, trace, estimated_trace, outcome in tests_details:
-            full_tests_details.append((name, sorted(map(lambda comp: map_component_id[comp] , trace), key=lambda x:x), estimated_trace, outcome))
+            full_tests_details.append((name, sorted(list(map(lambda comp: map_component_id[comp] , trace), key=lambda x:x)), estimated_trace, outcome))
     if priors is None:
         priors = dict(((component, 0.1) for component in components_names))
     if initial_tests is None:
-        initial_tests = map(lambda details: details[0], tests_details)
-    bugged_components = [map_component_id[component] for component in filter(lambda c: any(map(lambda b: b in c, bugs)),components_names)]
+        initial_tests = list(map(lambda details: details[0], tests_details))
+    bugged_components = [map_component_id[component] for component in filter(lambda c: any(list(map(lambda b: b in c, bugs)),components_names))]
     lines = [["[Description]"]] + [[description]]
     lines += [["[Components names]"]] + [list(enumerate(components_names))]
     lines += [["[Priors]"]] + [[[priors[component] for component in components_names]]]
@@ -84,9 +85,9 @@ def write_planning_file(out_path,
         writer.writerows(lines)
 
 def write_planning_file_by_ei(out_path, ei):
-    tests_details = map(lambda x: (x[0], map(Experiment_Data().COMPONENTS_NAMES.get, x[1]), ei.error[x[0]]),
-                        Experiment_Data().POOL.items())
-    write_planning_file(out_path, Experiment_Data().BUGS, tests_details)
+    tests_details = list(map(lambda x: (x[0], map(Experiment_Data().COMPONENTS_NAMES.get, x[1]), ei.error[x[0]]),
+                        Experiment_Data().POOL.items()))
+    write_planning_file(out_path, ei.bugs, tests_details)
 
 def write_merged_matrix(instance, out_matrix):
     componets = instance.get_components_vectors()
@@ -100,16 +101,16 @@ def write_merged_matrix(instance, out_matrix):
         for candidate in candidates:
             new_components_map[candidate] = new_name
     get_name = lambda index: new_components_map.get(Experiment_Data().COMPONENTS_NAMES[index], Experiment_Data().COMPONENTS_NAMES[index])
-    new_bugs = map(get_name, Experiment_Data().BUGS)
-    new_pool = map(lambda test: [test, list(set(map(get_name, Experiment_Data().POOL[test]))), instance.error[test]], Experiment_Data().POOL)
+    new_bugs = list(map(get_name, instance.bugs))
+    new_pool = list(map(lambda test: [test, list(set(map(get_name, Experiment_Data().POOL[test]))), instance.error[test]], Experiment_Data().POOL))
     write_planning_file(out_matrix, new_bugs, new_pool)
 
 
 def save_ds_to_matrix_file(ds, out_file):
-    tests_details = map(lambda details: (
+    tests_details = list(map(lambda details: (
     str(details[0]), map(lambda c: Experiment_Data().COMPONENTS_NAMES[c], details[1]), details[2]),
-                        list(zip(ds.tests_names, ds.TestsComponents, ds.error)))
-    write_planning_file(out_file, map(lambda c: Experiment_Data().COMPONENTS_NAMES[c], Experiment_Data().BUGS), tests_details)
+                        list(zip(ds.tests_names, ds.TestsComponents, ds.error))))
+    write_planning_file(out_file, list(map(lambda c: Experiment_Data().COMPONENTS_NAMES[c], Experiment_Data().BUGS), tests_details))
 
 
 def read_json_planning_file(file_path):
@@ -129,8 +130,8 @@ def read_json_planning_instance(instance):
     estimatedTestsPool = instance.get('estimatedTestsPool', {})
     priors = instance.get('priors', [0.1 for _ in components])
     Experiment_Data().set_values(priors, instance['bugs'], testsPool, components, estimatedTestsPool)
-    map(lambda x: setattr(Experiment_Data(), x[0], x[1]), instance.items())
-    return ExperimentInstanceFactory.get_experiment_instance(instance['initial_tests'], error, experiment_type)
+    list(map(lambda x: setattr(Experiment_Data(), x[0], x[1]), instance.items()))
+    return ExperimentInstanceFactory.get_experiment_instance(instance['initial_tests'], error, priors, list(map(lambda x: x.lower(), instance['bugs'])), testsPool, components, estimatedTestsPool, experiment_type)
 
 
 def write_json_planning_file(out_path, tests_details, bugs=None, initial_tests=None, **kwargs):
@@ -145,12 +146,12 @@ def write_json_planning_file(out_path, tests_details, bugs=None, initial_tests=N
             (name, sorted(set(map(lambda comp: map_component_id[comp], trace)), key=lambda x: x), outcome))
     instance['tests_details'] = full_tests_details
     if initial_tests is None:
-        initial_tests = map(lambda details: details[0], full_tests_details)
+        initial_tests = list(map(lambda details: details[0], full_tests_details))
     instance['initial_tests'] = initial_tests
     instance.update(kwargs)
     with open(out_path, "wb") as f:
         json.dump(instance, f)
 
 def write_json_planning_file_by_ei(out_path, ei, **kwargs):
-    tests_details = map(lambda x: (x[0], map(Experiment_Data().COMPONENTS_NAMES.get, x[1]), ei.error[x[0]]), Experiment_Data().POOL.items())
+    tests_details = list(map(lambda x: (x[0], map(Experiment_Data().COMPONENTS_NAMES.get, x[1]), ei.error[x[0]]), Experiment_Data().POOL.items()))
     write_json_planning_file(out_path, tests_details, **kwargs)

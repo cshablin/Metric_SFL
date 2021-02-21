@@ -1,10 +1,8 @@
 __author__ = 'amir'
 
-from pyswarm import pso
-from LightPSO import LightPSO
 import operator
 import functools
-import TF
+from .TF import TF
 import json
 import os
 from collections import Counter
@@ -18,7 +16,7 @@ class TfMemoize(object):
         self.memo = {}
         if os.path.exists(MEMOIZE_PATH):
             with open(MEMOIZE_PATH) as f:
-                print MEMOIZE_PATH
+                print(MEMOIZE_PATH)
                 self.memo = json.load(f)
         atexit.register(self.save)
 
@@ -37,7 +35,7 @@ class TfMemoize(object):
 #memoize = TfMemoize()
 
 
-class TFOptimize(TF.TF):
+class TFOptimize(TF):
     def __init__(self, matrix, error, diagnosis):
         super(TFOptimize, self).__init__(matrix, error, diagnosis)
         self.key = TFOptimize.get_key(matrix, error, diagnosis)
@@ -55,8 +53,8 @@ class TFOptimize(TF.TF):
                 else:
                     s_passed.append(sum1)
         range1 = range(1, 1 + len(diagnosis))
-        return ".".join(["-".join(map(lambda x: str(Counter(s_passed).get(x, 0)), range1)),
-                         "-".join(map(lambda x: str(Counter(s_failed).get(x, 0)), range1))])
+        return ".".join(["-".join(list(map(lambda x: str(Counter(s_passed).get(x, 0)), range1))),
+                         "-".join(list(map(lambda x: str(Counter(s_failed).get(x, 0)), range1)))])
 
     #@memoize.memoize
     def maximize(self):

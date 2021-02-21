@@ -1,4 +1,5 @@
 from .Barinel import Barinel
+from functools import reduce
 
 
 class FullMatrix(object):
@@ -18,7 +19,7 @@ class FullMatrix(object):
 
     def save_to_csv_file(self, out_file):
         import csv
-        lines = [self.probabilities] + map(lambda x: x[0] + [x[1]], zip(self.matrix, self.error))
+        lines = [self.probabilities] + list(map(lambda x: x[0] + [x[1]], zip(self.matrix, self.error)))
         with open(out_file, "wb") as f:
             writer = csv.writer(f)
             writer.writerows(lines)
@@ -35,7 +36,7 @@ class FullMatrix(object):
     # optimization: remove unreachable components & components that pass all their tests
     # return: optimized FullMatrix, chosen_components( indices), used_tests
     def optimize(self):
-        failed_tests = map(lambda test: list(enumerate(test[0])), filter(lambda test: test[1] == 1, zip(self.matrix, self.error)))
+        failed_tests = list(map(lambda test: list(enumerate(test[0])), filter(lambda test: test[1] == 1, zip(self.matrix, self.error))))
         used_components = dict(enumerate(sorted(reduce(set.__or__, map(lambda test: set(map(lambda comp: comp[0], filter(lambda comp: comp[1] == 1, test))), failed_tests), set()))))
         optimizedMatrix = self._create_full_matirx()
         optimizedMatrix.set_probabilities([x[1] for x in enumerate(self.probabilities) if x[0] in used_components])
@@ -43,7 +44,7 @@ class FullMatrix(object):
         newMatrix = []
         used_tests = []
         for i, (test, err) in enumerate(zip(self.matrix, self.error)):
-            newTest = map(lambda i: test[i], sorted(used_components.values()))
+            newTest = list(map(lambda i: test[i], sorted(used_components.values())))
             if 1 in newTest: ## optimization could remove all comps of a test
                 newMatrix.append(newTest)
                 newErr.append(err)

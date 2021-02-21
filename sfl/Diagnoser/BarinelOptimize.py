@@ -5,9 +5,8 @@ import math
 import sys
 from .Barinel import Barinel
 
-import DiagnosisOptimize
-import Staccato
-import TFOptimize
+from .DiagnosisOptimize import DiagnosisOptimize
+from .TFOptimize import TFOptimize
 
 
 class BarinelOptimize(Barinel):
@@ -16,7 +15,7 @@ class BarinelOptimize(Barinel):
         super(BarinelOptimize, self).__init__()
 
     def tf_for_diag(self, diagnosis):
-        return TFOptimize.TFOptimize(self.get_matrix(), self.get_error(), diagnosis)
+        return TFOptimize(self.get_matrix(), self.get_error(), diagnosis)
 
     def _new_diagnosis(self, diagnosis):
-        return DiagnosisOptimize.DiagnosisOptimize(diagnosis)
+        return DiagnosisOptimize(diagnosis)

@@ -5,11 +5,12 @@ __author__ = 'amir'
 import operator
 import functools
 from collections import Counter
+from functools import reduce
 
 
 class TF(object):
     def __init__(self, matrix, error, diagnosis):
-        self.activity = zip(range(len(matrix)), map(tuple, matrix), error)
+        self.activity = list(zip(range(len(matrix)), map(tuple, matrix), error))
         self.diagnosis = diagnosis
         self.active_components = dict(map(lambda a: (a[0], filter(functools.partial(tuple.__getitem__, a[1]), self.diagnosis)), self.activity))
         self.max_value = None
@@ -34,8 +35,8 @@ class TF(object):
         def test_prob(test_id, v, e):
             # if e==0 : h1*h2*h3..., if e==1: 1-h1*h2*h3...
             return e + ((-2.0 * e + 1.0) * reduce(operator.mul,
-                                                   map(h_dict[test_id].get, self.get_active_components()[test_id]), 1.0))
-        return reduce(operator.mul, map(functools.partial(apply, test_prob), self.get_activity()), 1.0)
+                                                   list(map(h_dict[test_id].get, self.get_active_components()[test_id])), 1.0))
+        return reduce(operator.mul, list(map(lambda x: test_prob(*x), self.get_activity())), 1.0)
 
     def probabilty_TF(self, h):
         dict_test = dict(zip(self.get_diagnosis(), h))
@@ -52,7 +53,7 @@ class TF(object):
             ub = [1 for _ in self.get_diagnosis()]
             import scipy.optimize
             self.max_value = -scipy.optimize.minimize(self.probabilty_TF,initialGuess,method="L-BFGS-B"
-                                        ,bounds=zip(lb,ub), tol=1e-3,options={'maxiter':100}).fun
+                                        ,bounds=list(zip(lb,ub)), tol=1e-3,options={'maxiter':100}).fun
             # self.max_value = -scipy.optimize.minimize(self.probabilty_TF,initialGuess,method="TNC"
             #                             ,bounds=zip(lb,ub), tol=1e-2,options={'maxiter':10}).fun
             # self.max_value = -scipy.optimize.minimize(self.probabilty_TF,initialGuess,method="SLSQP"

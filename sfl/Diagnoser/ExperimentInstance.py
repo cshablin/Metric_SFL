@@ -2,28 +2,46 @@ import copy
 import math
 import random
 from math import ceil
-import Diagnosis
+from .Diagnosis import Diagnosis
 from .dynamicSpectrum import dynamicSpectrum
 from .Experiment_Data import Experiment_Data
 import numpy
-from .Singelton import Singleton
+from functools import reduce
 
 TERMINAL_PROB = 0.7
 
 
 class ExperimentInstance(object):
-    def __init__(self, initial_tests, error):
+    def __init__(self, initial_tests, error, priors, bugs, pool, components, estimated_pool=None, **kwargs):
         self.initial_tests = initial_tests
         self.error = error
+        self.priors = priors
+        self.bugs = bugs
+        self.pool = pool
+        self.components = components
+        self.estimated_pool = estimated_pool
+        self.reversed_names = dict(map(lambda x: tuple(reversed(x)), self.components.items()))
+        # self.experiment_type = experiment_ty
+        list(map(lambda attr: setattr(self, attr, kwargs[attr]), kwargs))
         self.diagnoses = []
+
+    def get_component_id(self, component_name):
+        return self.reversed_names.get(component_name, None)
+
+    def get_named_bugs(self):
+        return list(map(self.components.get, self.bugs))
+
+    def get_id_bugs(self):
+        ret_value = list(map(self.get_component_id, self.bugs))
+        return ret_value
 
     def get_experiment_type(self):
         return 'normal'
 
     def initials_to_DS(self):
         ds = self._create_ds()
-        ds.TestsComponents = copy.deepcopy([Experiment_Data().POOL[test] for test in self.get_initials()])
-        ds.probabilities = list(Experiment_Data().PRIORS)
+        ds.TestsComponents = copy.deepcopy([self.pool[test] for test in self.get_initials()])
+        ds.probabilities = list(self.priors)
         ds.error=[self.get_error()[test] for test in self.get_initials()]
         ds.tests_names = list(self.get_initials())
         return ds
@@ -71,7 +89,7 @@ class ExperimentInstance(object):
         return sorted(compsProbs.items(), key=lambda x: x[1], reverse=True)
 
     def get_components_probabilities_by_name(self):
-        return map(lambda component: (Experiment_Data().COMPONENTS_NAMES[component[0]], component[1]), self.get_components_probabilities())
+        return list(map(lambda component: (Experiment_Data().COMPONENTS_NAMES[component[0]], component[1]), self.get_components_probabilities()))
 
     def next_tests_by_hp(self):
         """
@@ -143,7 +161,7 @@ class ExperimentInstance(object):
         # optionals = self.get_optionals_actions()
         optionals_seperator, tests_probabilities = domain_knowledge.seperator_hp(self)
         # optionals, tests_probabilities = self.next_tests_by_hp()
-        for t, p in sorted(zip(optionals_seperator, tests_probabilities), key=lambda x: x[1], reverse=True)[:int(ceil(len(optionals_seperator) * threshold))]:
+        for t, p in sorted(list(zip(optionals_seperator, tests_probabilities)), key=lambda x: x[1], reverse=True)[:int(ceil(len(optionals_seperator) * threshold))]:
             # if threshold_sum > threshold:
             #     break
             info = self.info_gain(t)
@@ -211,7 +229,7 @@ class ExperimentInstance(object):
 
     def entropy_next(self, threshold = 1.2, batch=1):
         optionals, information =  self.next_tests_by_entropy(threshold)
-        return map(lambda x: x[0], sorted(zip(optionals, information), reverse=True, key = lambda x: x[1])[:batch])
+        return list(map(lambda x: x[0], sorted(list(zip(optionals, information)), reverse=True, key = lambda x: x[1])[:batch]))
         # return numpy.random.choice(optionals, batch, p = information).tolist()
 
     def random_next(self):
@@ -263,7 +281,7 @@ class ExperimentInstance(object):
         self.diagnose()
         named_diagnoses = []
         for diagnosis in self.get_diagnoses():
-            named = Diagnosis.Diagnosis(map(lambda id: Experiment_Data().COMPONENTS_NAMES[id], diagnosis.diagnosis))
+            named = Diagnosis(list(map(lambda id: Experiment_Data().COMPONENTS_NAMES[id], diagnosis.diagnosis)))
             named.probability = diagnosis.probability
             named_diagnoses.append(named)
         return named_diagnoses
@@ -291,11 +309,11 @@ class ExperimentInstance(object):
         self.diagnose()
         recall_accum=0
         precision_accum=0
-        validComps=[x for x in range(max(reduce(list.__add__, Experiment_Data().POOL.values()))) if x not in Experiment_Data().BUGS]
+        validComps=[x for x in range(max(reduce(list.__add__, Experiment_Data().POOL.values()))) if x not in self.bugs]
         for d in self.get_diagnoses():
             dg=d.diagnosis
             pr=d.probability
-            precision, recall = ExperimentInstance.precision_recall_diag(Experiment_Data().BUGS, dg, pr, validComps)
+            precision, recall = ExperimentInstance.precision_recall_diag(self.bugs, dg, pr, validComps)
             if(recall!="undef"):
                 recall_accum=recall_accum+recall
             if(precision!="undef"):
@@ -303,20 +321,20 @@ class ExperimentInstance(object):
         return precision_accum,recall_accum
 
     def calc_wasted_components(self):
-        components = map(lambda x: x[0], self.get_components_probabilities())
+        components = list(map(lambda x: x[0], self.get_components_probabilities()))
         wasted = 0.0
-        for b in Experiment_Data().BUGS:
+        for b in self.bugs:
             if b not in components:
                 return float('inf')
             wasted += components.index(b)
-        return wasted / len(Experiment_Data().BUGS)
+        return wasted / len(self.bugs)
 
 
     def count_different_cases(self):
         """
         :return: the number of different test cases in the diagnosis
         """
-        optional_tests = map(lambda enum: enum[1], filter(lambda enum: enum[0] in self.initial_tests, enumerate(Experiment_Data().POOL)))
+        optional_tests = list(map(lambda enum: enum[1], filter(lambda enum: enum[0] in self.initial_tests, enumerate(Experiment_Data().POOL))))
         return len(set(map(str, optional_tests)))
 
     def __repr__(self):

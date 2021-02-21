@@ -1,9 +1,9 @@
 __author__ = 'amir'
 
-import Diagnosis
+from.Diagnosis import Diagnosis
 
 
-class DiagnosisOptimize(Diagnosis.Diagnosis):
+class DiagnosisOptimize(Diagnosis):
     def __init__(self, diagnosis=None):
         super(DiagnosisOptimize, self).__init__(diagnosis=diagnosis)
         self.key = ""

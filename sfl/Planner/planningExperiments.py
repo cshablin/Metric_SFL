@@ -110,7 +110,7 @@ class MCTSPlanner(AbstractPlanner):
         return action
 
     def get_name(self):
-        return "_".join(map(str, [self.__class__.__name__, self.approach, self.iterations]))
+        return "_".join(list(map(str, [self.__class__.__name__, self.approach, self.iterations])))
 
 
 class InitialsPlanner(AbstractPlanner):
@@ -140,7 +140,7 @@ class LRTDPPlanner(AbstractPlanner):
                                                              greedy_action_treshold=self.greedy_action_treshold, approach=self.approach).lrtdp()
 
     def get_name(self):
-        return "_".join(map(str, [self.__class__.__name__, self.approach, self.iterations]))
+        return "_".join(list(map(str, [self.__class__.__name__, self.approach, self.iterations])))
 
 
 class EntropyPlanner(AbstractPlanner):

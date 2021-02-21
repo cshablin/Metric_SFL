@@ -9,11 +9,11 @@ class ExperimentInstanceFactory(object):
     @staticmethod
     def create_key(initial_tests, error):
         return repr(sorted(initial_tests)) + "-" + repr(
-            sorted(map(lambda x: x[0], filter(lambda x: x[1] == 1, error.items()))))
+            sorted(list(map(lambda x: x[0], filter(lambda x: x[1] == 1, error.items())))))
 
     @staticmethod
-    def get_experiment_instance(initials, error, experiment_type='normal'):
+    def get_experiment_instance(initials, error, priors, bugs, pool, components, estimated_pool, experiment_type='normal', **kwargs):
         classes = {'normal': ExperimentInstance,
                    'influence': ExperimentInstanceInfluence}
                    #, 'optimize': ExperimentInstanceOptimize.Instances_Management().get_instance}
-        return classes.get(experiment_type, classes['normal'])(initials, error)
+        return classes.get(experiment_type, classes['normal'])(initials, error, priors, bugs, pool, components, estimated_pool, **kwargs)

@@ -3,7 +3,7 @@
 # return sorted list of optional tests ordered by the chosen metric
 
 import numpy
-
+from functools import reduce
 from .Diagnoser.Experiment_Data import Experiment_Data
 
 
@@ -127,7 +127,7 @@ def split_components_probabilities(ei):
     for test in optionals:
         trace = Experiment_Data().POOL[test]
         probabilities.append(1- abs(half_components_probabilities-reduce(lambda x,y:x+y, [components_probs.get(c,0) for c in trace])))
-    return zip(optionals, [x / sum(probabilities) for x in probabilities])
+    return list(zip(optionals, [x / sum(probabilities) for x in probabilities]))
 
 def components_activity(ei, aggregation):
     ei.diagnose()
@@ -176,7 +176,7 @@ def friends(ei):
                 continue
             p += components_probs[c] * len([x for x in components_friends[c] if x in trace])
             probabilities.append(p)
-    return zip(optionals, [x / sum(probabilities) for x in probabilities])
+    return list(zip(optionals, [x / sum(probabilities) for x in probabilities]))
 
 def partitial_components_probability(ei):
     ei.diagnose()
@@ -194,7 +194,7 @@ def seperator_hp(ei):
     components_probs = dict(ei.get_components_probabilities())
     for test in optionals:
         trace = Experiment_Data().POOL[test]
-        trace_probs = map(lambda x: components_probs.get(x,1), filter(lambda x: x in components_probs, trace))
+        trace_probs = list(map(lambda x: components_probs.get(x,1), filter(lambda x: x in components_probs, trace)))
         if trace_probs == []:
             probabilities.append(0.0)
             continue

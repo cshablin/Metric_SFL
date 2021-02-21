@@ -4,10 +4,7 @@ import csv
 import math
 import sys
 from .Barinel import Barinel
-
-import Diagnosis
-import Staccato
-import TFInfluence
+from .TFInfluence import TFInfluence
 
 
 class BarinelInfluence(Barinel):
@@ -24,4 +21,4 @@ class BarinelInfluence(Barinel):
         self.influence_alpha = alpha
 
     def tf_for_diag(self, diagnosis):
-        return TFInfluence.TFInfluence(self.get_matrix(), self.get_error(), diagnosis, self.influence_matrix, self.influence_alpha)
+        return TFInfluence(self.get_matrix(), self.get_error(), diagnosis, self.influence_matrix, self.influence_alpha)

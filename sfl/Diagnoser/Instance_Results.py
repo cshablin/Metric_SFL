@@ -20,7 +20,7 @@ class Instance_Results(object):
         return sorted(self.metrics.items(), key=lambda m:m[0])
 
     def get_metrics_values(self):
-        return map(lambda m:m[1], self._get_metrics_list())
+        return list(map(lambda m:m[1], self._get_metrics_list()))
 
     def get_metrics_names(self):
-        return map(lambda m:m[0], self._get_metrics_list())
+        return list(map(lambda m:m[0], self._get_metrics_list()))

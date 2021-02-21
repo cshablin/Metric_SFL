@@ -37,7 +37,7 @@ class ObjectCounter(object):
     def __init__(self):
         gc.collect()
         self.objects = gc.get_objects()
-        self.ids = map(id, self.objects)
+        self.ids = list(map(id, self.objects))
 
     def count(self):
         from collections import Counter
@@ -47,11 +47,9 @@ class ObjectCounter(object):
         for obj in objects:
             if id(obj) not in self.ids:
                 new_objs.append(obj)
-                print obj.__class__.__name__,  sys.getsizeof(obj)
-        c = Counter(map(lambda x: x.__class__.__name__, filter(lambda x: hasattr(x, "__class__"), new_objs)))
-        print "count", sorted(c.items(), key=lambda x: x[1])
+        c = Counter(list(map(lambda x: x.__class__.__name__, filter(lambda x: hasattr(x, "__class__"), new_objs))))
         self.objects = objects
-        self.ids = map(id, self.objects)
+        self.ids = list(map(id, self.objects))
 
 
 def mcts_uct(ei, iterations, approach):

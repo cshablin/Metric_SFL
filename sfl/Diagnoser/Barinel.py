@@ -4,9 +4,9 @@ import csv
 import math
 import sys
 
-import Diagnosis
-import Staccato
-import TF
+from .Diagnosis import Diagnosis
+from .Staccato import Staccato
+from .TF import TF
 
 prior_p = 0.05
 
@@ -70,12 +70,12 @@ class Barinel(object):
         self.set_diagnoses(new_diagnoses)
 
     def tf_for_diag(self, diagnosis):
-        return TF.TF(self.get_matrix(), self.get_error(), diagnosis)
+        return TF(self.get_matrix(), self.get_error(), diagnosis)
 
     def run(self):
         self.set_diagnoses([])
         new_diagnoses = []
-        diagnoses = Staccato.Staccato().run(self.get_matrix(), self.get_error())
+        diagnoses = Staccato().run(self.get_matrix(), self.get_error())
         for diagnosis in diagnoses:
             new_diagnoses.append(self._new_diagnosis(diagnosis))
         self.set_diagnoses(new_diagnoses)
@@ -83,4 +83,4 @@ class Barinel(object):
         return self.get_diagnoses()
 
     def _new_diagnosis(self, diagnosis):
-        return Diagnosis.Diagnosis(diagnosis)
+        return Diagnosis(diagnosis)

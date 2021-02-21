@@ -63,7 +63,7 @@ lb=[0 for _ in d]
 
 
 xopt, fopt = pso(probabilty_TF, lb, ub,swarmsize =1000,maxiter =10000000)
-print -fopt
+print(-fopt)
 
 
 # print -probabilty_TF([0.47,0.19])

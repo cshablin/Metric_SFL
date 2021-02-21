@@ -14,7 +14,6 @@ def gradient_descent_2(alpha, x, y, numIterations):
         hypothesis = np.dot(x, theta)
         loss = hypothesis - y
         J = np.sum(loss ** 2) / (2 * m)  # cost
-        print "iter %s | J: %.3f" % (iter, J)
         gradient = np.dot(x_transpose, loss) / m
         theta = theta - alpha * gradient  # update
     return theta
@@ -33,4 +32,3 @@ if __name__ == '__main__':
     pylab.plot(x[:,1],y,'o')
     pylab.plot(x,y_predict,'k-')
     pylab.show()
-    print "Done!"

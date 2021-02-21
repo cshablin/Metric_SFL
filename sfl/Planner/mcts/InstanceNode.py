@@ -18,11 +18,11 @@ class ChildActions(object):
         return self.children[action]
 
     def fully_expanded(self):
-        return len(self.actions) == len(self.children) and all(map(lambda x: x.fully_expanded(), self.children.values()))
+        return len(self.actions) == len(self.children) and all(list(map(lambda x: x.fully_expanded(), self.children.values())))
 
     def get_children(self, all_children=True):
         if all_children:
-            return zip(*self.actions)[0]
+            return list(zip(*self.actions))[0]
         return self.children.keys()
 
 
@@ -123,7 +123,7 @@ class InstanceNode(object):
         node.
         """
         child = self.best_child(c)
-        action = filter(lambda parent: parent[1] == self, child.parents.items())[0][0]
+        action = list(filter(lambda parent: parent[1] == self, child.parents.items()))[0][0]
         return action, child.weight
 
     def simulation(self):

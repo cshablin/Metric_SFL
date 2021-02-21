@@ -1,7 +1,7 @@
 __author__ = 'amir'
 
 
-import St_Strip
+from .St_Strip import St_Strip
 
 L = 20
 
@@ -90,6 +90,6 @@ class Staccato():
         self.calls = 0
         N = len(M_matrix)
         M = len(M_matrix[0])
-        strip = St_Strip.St_Strip(M, N)
+        strip = St_Strip(M, N)
         result = self.runStrip(M_matrix, e_vector, strip)
         return result

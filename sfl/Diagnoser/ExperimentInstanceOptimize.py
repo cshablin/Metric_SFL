@@ -2,11 +2,9 @@ import copy
 import math
 import random
 from math import ceil
-import Diagnosis
 from .dynamicSpectrumOptimize import dynamicSpectrumOptimize
-from .Experiment_Data import Experiment_Data
+from .Experiment_Data import Experiment_Data, Singleton
 import numpy
-from .Singelton import Singleton
 from .ExperimentInstance import ExperimentInstance
 
 TERMINAL_PROB = 0.7
@@ -24,7 +22,7 @@ class Instances_Management(object):
         self.instances = {}
 
     def get_instance(self, initial_tests, error):
-        key = repr(sorted(initial_tests)) + "-" + repr(sorted(map(lambda x: x[0], filter(lambda x: x[1] == 1, error.items()))))
+        key = repr(sorted(initial_tests)) + "-" + repr(sorted(list(map(lambda x: x[0], filter(lambda x: x[1] == 1, error.items())))))
         if key not in self.instances:
             self.instances[key] = self.create_instance_from_key(key)
         return self.instances[key]

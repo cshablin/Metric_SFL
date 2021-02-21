@@ -15,19 +15,19 @@ class LightPSO:
         self.gbest_val = 0.0
 
     def initialize(self):
-        self.position_matrix.update(map(lambda x: (x, map(lambda x: random(), range(self.dim))), particles))
-        self.velocity_matrix.update(map(lambda x: (x, map(lambda x: random(), range(self.dim))), particles))
-        self.pbest.update(map(lambda particle: (particle,list(self.position_matrix[particle])), particles))
-        self.pbest_val.update(map(lambda particle: (particle, self.tf.probabilty_TF(self.pbest[particle])), particles))
+        self.position_matrix.update(list(map(lambda x: (x, map(lambda x: random(), range(self.dim))), particles)))
+        self.velocity_matrix.update(list(map(lambda x: (x, map(lambda x: random(), range(self.dim))), particles)))
+        self.pbest.update(list(map(lambda particle: (particle,list(self.position_matrix[particle])), particles)))
+        self.pbest_val.update(list(map(lambda particle: (particle, self.tf.probabilty_TF(self.pbest[particle])), particles)))
         self.find_gbest()
 
     def find_gbest(self):
         def prob(particle):
             return self.position_matrix[particle], self.tf.probabilty_TF(self.position_matrix[particle])
-        self.gbest ,self.gbest_val = min(map(prob, particles),key=lambda x: x[1])
+        self.gbest ,self.gbest_val = min(list(map(prob, particles),key=lambda x: x[1]))
 
     def move_particles(self):
-        map(lambda x: self.move_particles, particles)
+        list(map(lambda x: self.move_particles, particles))
 
     def move_particle(self, particle):
         random_factor = random()
@@ -36,8 +36,8 @@ class LightPSO:
         def update_velocity(d):
             v = self.position_matrix[particle][d]
             return 0 if (v == 1 or v == 0) else v
-        self.position_matrix[particle].update(map(lambda d: (d, update_position(d)), range(self.dim)))
-        self.velocity_matrix[particle].update(map(lambda d: (d, update_velocity(d)), range(self.dim)))
+        self.position_matrix[particle].update(list(map(lambda d: (d, update_position(d)), range(self.dim))))
+        self.velocity_matrix[particle].update(list(map(lambda d: (d, update_velocity(d)), range(self.dim))))
         temp_val = self.tf.probabilty_TF(self.position_matrix[particle])
         if temp_val < self.pbest_val[particle]:
             self.pbest[particle] = list(self.position_matrix[particle])

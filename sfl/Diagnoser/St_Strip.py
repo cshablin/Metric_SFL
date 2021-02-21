@@ -1,6 +1,6 @@
 __author__ = 'amir'
 
-import Ochiai_Rank
+from .Ochiai_Rank import Ochiai_Rank
 
 class St_Strip:
     def __init__(self,M,N):
@@ -116,7 +116,7 @@ class St_Strip:
     def calc_ochiai_ranks(self, M_matrix, e_vector):
         result = {}
         for i in range(len(M_matrix[0])):
-            self.ochiai_ranks[i] = Ochiai_Rank.Ochiai_Rank()
+            self.ochiai_ranks[i] = Ochiai_Rank()
         unstripped_confs = self.unstripped_confs_array_Func()
         unstripped_comps = self.unstripped_comps_array_Func()
         for conf in unstripped_confs:

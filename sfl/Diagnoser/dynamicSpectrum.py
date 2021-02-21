@@ -1,4 +1,5 @@
 from .FullMatrix import FullMatrix
+from functools import reduce
 
 
 class dynamicSpectrum(object):
@@ -36,7 +37,7 @@ class dynamicSpectrum(object):
         ans = self._create_full_matrix()
         ans.set_probabilities(list(self.getprobabilities()))
         ans.set_error(list(self.geterror()))
-        ans.set_matrix(map(lambda test: map(lambda comp: 1 if comp in test else 0, range(len(self.getprobabilities()))), self.getTestsComponents()))
+        ans.set_matrix(list(map(lambda test: list(map(lambda comp: 1 if comp in test else 0, range(len(self.getprobabilities())))), self.getTestsComponents())))
         return ans
 
     def _create_full_matrix(self):
@@ -62,7 +63,7 @@ class dynamicSpectrum(object):
         return ds
 
     def get_tests_by_error(self, error):
-        return map(lambda test: test[1], filter(lambda test: self.geterror()[test[0]] == error, enumerate(self.getTestsComponents())))
+        return list(map(lambda test: test[1], filter(lambda test: self.geterror()[test[0]] == error, enumerate(self.getTestsComponents()))))
 
     def get_failed_tests(self):
         return self.get_tests_by_error(1)
@@ -83,10 +84,10 @@ class dynamicSpectrum(object):
         failed_components = self.get_components_in_failed_tests()
         new_names = []
         new_tests = []
-        new_probabilities = map(lambda p: p[1], filter(lambda p: p[0] in failed_components, enumerate(self.getprobabilities())))
+        new_probabilities = list(map(lambda p: p[1], filter(lambda p: p[0] in failed_components, enumerate(self.getprobabilities()))))
         new_error = []
         for name, test, e in zip(self.gettests_names(), self.getTestsComponents(), self.geterror()):
-            new_test = filter(lambda comp: comp in failed_components, test)
+            new_test = list(filter(lambda comp: comp in failed_components, test))
             if new_test == []:
                 continue
             new_names.append(name)

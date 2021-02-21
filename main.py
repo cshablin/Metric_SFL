@@ -1,12 +1,8 @@
-from .Diagnoser.diagnoserUtils import readPlanningFile
-from .Diagnoser.Diagnosis_Results import Diagnosis_Results
-import sfl.Diagnoser.ExperimentInstance
+from sfl.Diagnoser.diagnoserUtils import write_json_planning_file, read_json_planning_instance, read_json_planning_file
+from sfl.Diagnoser.Experiment_Data import Experiment_Data
+from sfl.Diagnoser.Diagnosis_Results import Diagnosis_Results
 
-
-inst = readPlanningFile("C:\\Users\\eyalhad\\Desktop\\SFL-diagnoser\\MatrixFile2.txt")
-inst.diagnose()
-results = Diagnosis_Results(inst.diagnoses, inst.initial_tests, inst.error)
-results.get_metrics_names()
-results.get_metrics_values()
-ei = .sfl.Diagnoser.ExperimentInstance.addTests(inst, inst.hp_next_by_prob())
-i=5
+ei = read_json_planning_file(r'506bd018b3ca638cd0c9d1bdad627f6468a05bee')
+ei.diagnose()
+print(Diagnosis_Results(ei.diagnoses, ei.initial_tests, ei.error, ei.pool, ei.get_id_bugs()).metrics)
+pass

@@ -1,13 +1,12 @@
 __author__ = 'amir'
 
-from pyswarm import pso
-from LightPSO import LightPSO
+# from LightPSO import LightPSO
 import operator
 import functools
-import TF
+from.TF import TF
 
 
-class TFInfluence(TF.TF):
+class TFInfluence(TF):
     def __init__(self, matrix, error, diagnosis, influence_matrix, influence_alpha):
         super(TFInfluence, self).__init__(matrix, error, diagnosis)
         self.influence_matrix = influence_matrix

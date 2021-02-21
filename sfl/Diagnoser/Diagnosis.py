@@ -34,4 +34,4 @@ class Diagnosis(object):
         return str(sorted(self.diagnosis))+" P: "+str(self.get_prob())
 
     def as_dict(self):
-        return {'_diagnosis': map(lambda f: {'_name': f}, sorted(self.get_diag())), '_probability': self.get_prob()}
+        return {'_diagnosis': list(map(lambda f: {'_name': f}, sorted(self.get_diag()))), '_probability': self.get_prob()}

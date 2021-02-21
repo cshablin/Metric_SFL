@@ -37,7 +37,7 @@ class LrtdpState(object):
         optionals, probabilities = self.experimentInstance.get_optionals_probabilities_by_approach(self.approach)
         filtered_actions = []
         probabilities_sum = 0.0
-        for a, p in sorted(zip(optionals, probabilities)):
+        for a, p in sorted(list(zip(optionals, probabilities))):
             probabilities_sum += p
             filtered_actions.append(a)
             if probabilities_sum > treshold:

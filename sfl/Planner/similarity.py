@@ -3,6 +3,7 @@
 # return sorted list of optional tests ordered by the chosen metric
 
 import sfl.Diagnoser.ExperimentInstance
+from functools import reduce
 
 
 def get_min_vectors(test, diagnosis, is_boolean= False):
