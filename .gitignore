@@ -157,4 +157,4 @@ fabric.properties
 *.iml
 
 ## Directory-based project format:
-.idea/
+/.idea/
