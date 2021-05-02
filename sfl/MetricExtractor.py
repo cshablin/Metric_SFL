@@ -35,10 +35,8 @@ class JavaCallGraphMetricExtractor(object):
                     for test, method_2_params in self.test_2_interest_methods.items():
                         f1_lower = f1.lower()
                         f2_lower = f2.lower()
-                        if all(k in method_2_params for k in (f1_lower, f2_lower)):
-                            result[test].append((f1_lower, f2_lower))
+                        if f1_lower in method_2_params:
+                            if f2_lower in method_2_params:
+                                result[test].append((f1_lower, f2_lower))
 
         return result
-
-
-
