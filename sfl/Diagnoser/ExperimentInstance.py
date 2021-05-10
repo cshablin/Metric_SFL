@@ -24,6 +24,10 @@ class ExperimentInstance(object):
         # self.experiment_type = experiment_ty
         list(map(lambda attr: setattr(self, attr, kwargs[attr]), kwargs))
         self.diagnoses = []
+        self.test_2_comps_metric = None
+
+    def set_comps_metric(self, components_metric):
+        self.test_2_comps_metric = components_metric
 
     def get_component_id(self, component_name):
         return self.reversed_names.get(component_name, None)
