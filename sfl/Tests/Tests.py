@@ -39,12 +39,12 @@ class MyTestCase(unittest.TestCase):
 
         self.assertEqual(len(result['3616_912a565f'][unicode(u'org.apache.maven.settings.validation.defaultsettingsvalidatortest.testvalidatemirror')]), 1)
 
-    @unittest.skip("testing skipping")
+    # @unittest.skip("testing skipping")
     def test_diagnosis_using_caller_graph_metrics(self):
         commits_2_tests_metrics = self.get_maven_commits_2_metrics()
         for commit_matrix, test_2_connected_components in commits_2_tests_metrics.items():
             experiment_instance = read_json_planning_file(path.join(self.maven_matrices_folder, commit_matrix))
-            call_graph_components_metric = ComponentsMetric.factory(ComponentsMetricType.JavaCallGraphMetric, None, None)
+            call_graph_components_metric = ComponentsMetric.factory(ComponentsMetricType.JavaCallGraphMetric, None, test_2_connected_components)
             experiment_instance.set_comps_metric(call_graph_components_metric)
             experiment_instance.diagnose()
             print(Diagnosis_Results(experiment_instance.diagnoses, experiment_instance.initial_tests, experiment_instance.error,

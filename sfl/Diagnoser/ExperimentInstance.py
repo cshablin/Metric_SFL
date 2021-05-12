@@ -24,10 +24,10 @@ class ExperimentInstance(object):
         # self.experiment_type = experiment_ty
         list(map(lambda attr: setattr(self, attr, kwargs[attr]), kwargs))
         self.diagnoses = []
-        self.test_2_comps_metric = None
+        self.components_metric = None
 
     def set_comps_metric(self, components_metric):
-        self.test_2_comps_metric = components_metric
+        self.components_metric = components_metric
 
     def get_component_id(self, component_name):
         return self.reversed_names.get(component_name, None)
@@ -51,7 +51,7 @@ class ExperimentInstance(object):
         return ds
 
     def _create_ds(self):
-        return dynamicSpectrum()
+        return dynamicSpectrum(self.components_metric)
 
     def get_optionals_actions(self):
         optionals = [x for x in Experiment_Data().POOL if x not in self.get_initials()]
