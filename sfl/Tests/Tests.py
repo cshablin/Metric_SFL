@@ -30,7 +30,8 @@ class MyTestCase(unittest.TestCase):
                 for i in comps_ints:
                     comp_name = str(ei.components[i])
                     method_split = comp_name.split('(')
-                    methods[method_split[0]] = method_split[1].strip(')')
+                    # methods[method_split[0]] = method_split[1].strip(')')
+                    methods[comp_name] = method_split[1].strip(')')
                 test_2_components[test] = methods
         return test_2_components
 

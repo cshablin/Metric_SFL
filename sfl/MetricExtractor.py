@@ -24,14 +24,14 @@ class JavaCallGraphMetricExtractor(object):
                 if line.startswith("M:"):
                     pair = line.split()
                     f1_struct = pair[0].split(":")
-                    class1 = f1_struct[1]
-                    method1_name = f1_struct[2].split("(")[0]
-                    f1 = class1 + "." + method1_name
+                    func1 = self.shorten_parameters(f1_struct[2])
+                    f1 = f1_struct[1] + "." + func1
 
                     f2_struct = pair[1].split(":")
                     class2 = f2_struct[0].split(")")[1]
-                    method2_name = f2_struct[1].split("(")[0]
-                    f2 = class2 + "." + method2_name
+                    func2 = self.shorten_parameters(f2_struct[1])
+                    f2 = class2 + "." + func2
+
                     for test, method_2_params in self.test_2_interest_methods.items():
                         f1_lower = f1.lower()
                         f2_lower = f2.lower()
@@ -40,3 +40,24 @@ class JavaCallGraphMetricExtractor(object):
                                 result[test].append((f1_lower, f2_lower))
 
         return result
+
+    def shorten_parameters(self, func):
+        import re
+        split1 = re.split('\(|\)', func)
+        method_name = split1[0]
+        method_params = split1[1]
+        if not method_params:
+            return method_name + '()'
+        result = method_name + '('
+        full_named_parameters = method_params.split(',')
+        counter = 1
+        total_params = len(full_named_parameters)
+        for full_param in full_named_parameters:
+            all_param_names = full_param.split('.')
+            param_name = all_param_names[len(all_param_names) - 1].lower()
+            result += param_name
+            if counter < total_params:
+                result += ';'
+            counter += 1
+
+        return result + ')'
