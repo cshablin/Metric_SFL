@@ -43,7 +43,7 @@ class dynamicSpectrum(object):
         ans.set_probabilities(list(self.getprobabilities()))
         ans.set_error(list(self.geterror()))
         ans.set_matrix(list(map(lambda test: list(map(lambda comp: 1 if comp in test else 0, range(len(self.getprobabilities())))), self.getTestsComponents())))
-        if not self.components_metric:
+        if self.components_metric is not None:
             # new consideration for close components
             self.components_metric.change(ans.matrix)
         return ans

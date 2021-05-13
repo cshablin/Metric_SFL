@@ -18,7 +18,7 @@ class MyTestCase(unittest.TestCase):
 
         test_2_components = self.get_inspection_2_comps(ei)
 
-        metric_extractor = JavaCallGraphMetricExtractor(raw_caller_graph, test_2_components)
+        metric_extractor = JavaCallGraphMetricExtractor(raw_caller_graph, test_2_components, ei)
         test_2_connected_components = metric_extractor.get_connected_methods()
 
     def get_inspection_2_comps(self, ei):
@@ -59,7 +59,7 @@ class MyTestCase(unittest.TestCase):
 
                 test_2_components = self.get_inspection_2_comps(ei)
                 raw_caller_graph = path.join(self.maven_caller_graph_folder, matrix.split('_')[1] + '.txt')
-                metric_extractor = JavaCallGraphMetricExtractor(raw_caller_graph, test_2_components)
+                metric_extractor = JavaCallGraphMetricExtractor(raw_caller_graph, test_2_components, ei)
                 # dictionary <test_name, list<(f1, f2)>>
                 test_2_connected_components = metric_extractor.get_connected_methods()
                 result[matrix] = test_2_connected_components

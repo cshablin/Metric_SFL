@@ -1,14 +1,31 @@
 
+class ExtractedComponents(object):
+    def __init__(self, comps_names, comps_positions):
+        """
+
+        :param comps_names: list
+        :param comps_positions: list
+        """
+        self.comps_names = comps_names
+        self.comps_positions = comps_positions
+
 
 class JavaCallGraphMetricExtractor(object):
 
-    def __init__(self, java_call_graph_file, test_2_components):
+    def __init__(self, java_call_graph_file, test_2_components, experiment_instance):
+        """
+
+        :param java_call_graph_file: generated file using the caller graph tool
+        :param test_2_components: dictionary
+        :param experiment_instance: ExperimentInstance
+        """
         self._call_graph_file = java_call_graph_file
         self.test_2_interest_methods = test_2_components  # dict<test, dict<method_lowercase, parameters>>
+        self.experiment_instance = experiment_instance
 
     def get_connected_methods(self):
         """
-        :return: dictionary <test_name, list<(f1, f2)>>
+        :return: dictionary <test_name, list<ExtractedComponents>>
         """
         # initialize result
         result = {}
@@ -37,7 +54,8 @@ class JavaCallGraphMetricExtractor(object):
                         f2_lower = f2.lower()
                         if f1_lower in method_2_params:
                             if f2_lower in method_2_params:
-                                result[test].append((f1_lower, f2_lower))
+                                ec = self.get_extracted_components([f1_lower, f2_lower])
+                                result[test].append(ec)
 
         return result
 
@@ -61,3 +79,11 @@ class JavaCallGraphMetricExtractor(object):
             counter += 1
 
         return result + ')'
+
+    def get_extracted_components(self, comps_list):
+        resulting_positions = []
+        for comp in comps_list:
+            for position, comp_name in self.experiment_instance.components.items():
+                if comp == str(comp_name):
+                    resulting_positions.append(position)
+        return ExtractedComponents(comps_list, resulting_positions)
