@@ -3,7 +3,7 @@ from functools import reduce
 
 
 class dynamicSpectrum(object):
-    def __init__(self, components_metric):
+    def __init__(self, components_metric=None):
         """
 
         :param components_metric: ComponentsMetric
@@ -45,7 +45,7 @@ class dynamicSpectrum(object):
         ans.set_matrix(list(map(lambda test: list(map(lambda comp: 1 if comp in test else 0, range(len(self.getprobabilities())))), self.getTestsComponents())))
         if self.components_metric is not None:
             # new consideration for close components
-            self.components_metric.change(ans.matrix)
+            self.components_metric.change(ans.matrix, self.getTestsComponents())
         return ans
 
     def _create_full_matrix(self):
