@@ -46,21 +46,24 @@ class MyTestCase(unittest.TestCase):
         for commit_matrix, test_2_connected_components in commits_2_tests_metrics.items():
 
             experiment_instance = read_json_planning_file(path.join(self.maven_matrices_folder, commit_matrix))
-            context = ComponentsMetricContext(experiment_instance.initial_tests, experiment_instance.pool, experiment_instance.get_id_bugs(), experiment_instance.error)
+            print("without metric {}:".format(commit_matrix))
+            self.diagnose(experiment_instance, None)
+            original_diagnoses = experiment_instance.diagnoses
+
+            experiment_instance = read_json_planning_file(path.join(self.maven_matrices_folder, commit_matrix))
+            context = ComponentsMetricContext(experiment_instance.initial_tests, experiment_instance.pool,
+                                              experiment_instance.get_id_bugs(), experiment_instance.error,
+                                              original_diagnoses)
             call_graph_components_metric = ComponentsMetric.factory(ComponentsMetricType.JavaCallGraphMetric,
                                                                     context, test_2_connected_components)
             print("with metric {}:".format(commit_matrix))
             self.diagnose(experiment_instance, call_graph_components_metric)
 
-            experiment_instance = read_json_planning_file(path.join(self.maven_matrices_folder, commit_matrix))
-            print("without metric {}:".format(commit_matrix))
-            self.diagnose(experiment_instance, None)
-
     def diagnose(self, experiment_instance, call_graph_components_metric):
         experiment_instance.set_comps_metric(call_graph_components_metric)
         experiment_instance.diagnose()
         print(Diagnosis_Results(experiment_instance.diagnoses, experiment_instance.initial_tests, experiment_instance.error,
-                                experiment_instance.pool, experiment_instance.get_id_bugs()).metrics)
+                                experiment_instance.pool, experiment_instance.get_id_bugs(), call_graph_components_metric).metrics)
 
 
     def get_maven_commits_2_metrics(self):

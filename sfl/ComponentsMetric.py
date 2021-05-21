@@ -7,18 +7,20 @@ class ComponentsMetricType:
 
 
 class ComponentsMetricContext(object):
-    def __init__(self, initial_tests, pool, bugs, errors):
+    def __init__(self, initial_tests, pool, bugs, errors, original_diagnosis):
         """
 
         :param initial_tests: list<'test'> defines test index order
         :param pool: dict<'test', [int]>
         :param bugs: list<int> components indexes
         :param errors: dict<'test', 0|1>
+        :type original_diagnosis: list<'sfl.Diagnoser.Diagnosis.Diagnosis'>
         """
         self.initial_tests = initial_tests
         self.pool = pool
         self.bugs = bugs
         self.errors = errors
+        self.original_diagnosis = original_diagnosis
 
 
 class ComponentsMetric(object):
@@ -26,12 +28,13 @@ class ComponentsMetric(object):
     def __init__(self, context, metric_descriptor):
         """
 
-        :param regular_diagnose: ComponentsMetricContext
+        :param context: ComponentsMetricContext
         :param metric_descriptor: <test_name, list<ExtractedComponents>>
         """
         self.context = context
         self.metric_descriptor = metric_descriptor
         self.original_matrix = None
+        self.test_2_ordered_closest_comps = {}  # dict<test, list<int>>
 
     def change(self, matrix, tests_components):
         pass
@@ -49,11 +52,16 @@ class JavaCallGraphComponentsMetric(ComponentsMetric):
 
     def __init__(self, regular_diagnose, metric_descriptor):
         ComponentsMetric.__init__(self, regular_diagnose, metric_descriptor)
+        self.sorted_comps_by_order = None
+        self.combined_position = None
 
     def change(self, matrix, tests_components):
         self.original_matrix = [x[:] for x in matrix]
         for test, close_comps in self.metric_descriptor.items():
             close_comps_positions = self.calculate_closest_comps(close_comps)
+            if close_comps_positions is not None:
+                close_comps_positions = self.order(close_comps_positions)
+            self.test_2_ordered_closest_comps[test] = close_comps_positions
             if close_comps_positions is not None:
                 self.combine_columns(close_comps_positions, matrix, tests_components)
 
@@ -107,3 +115,24 @@ class JavaCallGraphComponentsMetric(ComponentsMetric):
                 except ValueError:
                     pass
 
+    def order(self, close_comps_positions):
+        """
+
+        :param close_comps_positions: list<int>
+        :return: same list with high probable first order
+        """
+        from sfl.Diagnoser.Diagnosis import Diagnosis
+        import operator
+
+        result = []
+        comp_2_order = {}
+        original_diagnosis = self.context.original_diagnosis
+        for comp in close_comps_positions:
+            found_index = original_diagnosis.index(Diagnosis([comp]))
+            comp_2_order[comp] = found_index
+
+        self.sorted_comps_by_order = sorted(comp_2_order.items(), key=operator.itemgetter(1))
+        for t in self.sorted_comps_by_order:
+            result.append(t[0])
+
+        return result

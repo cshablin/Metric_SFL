@@ -8,6 +8,15 @@ class Diagnosis(object):
         self.diagnosis = sorted(diagnosis)
         self.probability = 0.0
 
+    def __eq__(self, other):
+        """Overrides the default implementation"""
+        if isinstance(other, Diagnosis):
+            return self.diagnosis == other.diagnosis
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def clone(self):
         res = Diagnosis()
         res.diagnosis = list(self.diagnosis)

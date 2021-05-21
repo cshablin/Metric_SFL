@@ -7,12 +7,13 @@ from functools import reduce
 
 
 class Diagnosis_Results(object):
-    def __init__(self, diagnoses, initial_tests, error, pool=None, bugs=None):
+    def __init__(self, diagnoses, initial_tests, error, pool=None, bugs=None, components_metric=None):
         self.diagnoses = diagnoses
         self.initial_tests = initial_tests
         self.error = error
         self.pool = pool
         self.bugs = bugs
+        self.components_metric = components_metric  # ComponentsMetric
         if bugs is None:
             experiment_data_bugs = bugs
             if isinstance(experiment_data_bugs[0], int):
@@ -181,6 +182,8 @@ class Diagnosis_Results(object):
 
     def calc_wasted_components(self):
         components = list(map(lambda x: x[0], self.get_components_probabilities()))
+        if self.components_metric is not None:
+            self.insert_omitted_comps(components)
         if len(self.get_bugs()) == 0:
             return len(components)
         wasted = 0.0
@@ -189,6 +192,15 @@ class Diagnosis_Results(object):
                 return len(components)
             wasted += components.index(b)
         return wasted / len(self.get_bugs())
+
+    def insert_omitted_comps(self, components):
+        for test, comps in self.components_metric.test_2_ordered_closest_comps.items():
+            if comps is not None:
+                representing_comp = comps[0]
+                representing_comp_index = components.index(representing_comp)
+                for comp in reversed(comps):
+                    if comp not in components:
+                        components.insert(representing_comp_index + 1, comp)
 
     def calc_top_k(self):
         components = list(map(lambda x: x[0], self.get_components_probabilities()))
