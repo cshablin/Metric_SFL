@@ -198,9 +198,15 @@ class Diagnosis_Results(object):
             if comps is not None:
                 representing_comp = comps[0]
                 representing_comp_index = components.index(representing_comp)
+                sorted_comps = self.components_metric.sorted_comps_by_order
+                representing_first_comp_index_in_ordered_original = [i for i, tupl in enumerate(sorted_comps) if tupl[0] == representing_comp][0]
                 for comp in reversed(comps):
                     if comp not in components:
-                        components.insert(representing_comp_index + 1, comp)
+                        representing_comp_index_in_ordered_original = [i for i, tupl in enumerate(sorted_comps) if tupl[0] == comp][0]
+                        if representing_first_comp_index_in_ordered_original < representing_comp_index_in_ordered_original:
+                            components.insert(representing_comp_index + 1, comp)
+                        else:
+                            components.insert(representing_comp_index + 0, comp)
 
     def calc_top_k(self):
         components = list(map(lambda x: x[0], self.get_components_probabilities()))
