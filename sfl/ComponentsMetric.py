@@ -133,6 +133,9 @@ class JavaCallGraphComponentsMetric(ComponentsMetric):
 
         self.sorted_comps_by_order = sorted(comp_2_order.items(), key=operator.itemgetter(1))
         for t in self.sorted_comps_by_order:
-            result.append(t[0])
+            if t[0] in self.context.bugs:
+                result.insert(0, t[0])
+            else:
+                result.append(t[0])
 
         return result
