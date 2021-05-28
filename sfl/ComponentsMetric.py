@@ -52,7 +52,7 @@ class JavaCallGraphComponentsMetric(ComponentsMetric):
 
     def __init__(self, regular_diagnose, metric_descriptor):
         ComponentsMetric.__init__(self, regular_diagnose, metric_descriptor)
-        self.sorted_comps_by_order = None
+        self.sorted_comps_by_order = {}
         self.combined_position = None
 
     def change(self, matrix, tests_components):
@@ -60,7 +60,7 @@ class JavaCallGraphComponentsMetric(ComponentsMetric):
         for test, close_comps in self.metric_descriptor.items():
             close_comps_positions = self.calculate_closest_comps(close_comps)
             if close_comps_positions is not None:
-                close_comps_positions = self.order(close_comps_positions)
+                close_comps_positions = self.order(close_comps_positions, test)
             self.test_2_ordered_closest_comps[test] = close_comps_positions
             if close_comps_positions is not None:
                 self.combine_columns(close_comps_positions, matrix, tests_components)
@@ -115,9 +115,10 @@ class JavaCallGraphComponentsMetric(ComponentsMetric):
                 except ValueError:
                     pass
 
-    def order(self, close_comps_positions):
+    def order(self, close_comps_positions, test):
         """
 
+        :param test: test name <unicode>
         :param close_comps_positions: list<int>
         :return: same list with high probable first order
         """
@@ -131,8 +132,8 @@ class JavaCallGraphComponentsMetric(ComponentsMetric):
             found_index = original_diagnosis.index(Diagnosis([comp]))
             comp_2_order[comp] = found_index
 
-        self.sorted_comps_by_order = sorted(comp_2_order.items(), key=operator.itemgetter(1))
-        for t in self.sorted_comps_by_order:
+        self.sorted_comps_by_order[test] = sorted(comp_2_order.items(), key=operator.itemgetter(1))
+        for t in self.sorted_comps_by_order[test]:
             if t[0] in self.context.bugs:
                 result.insert(0, t[0])
             else:

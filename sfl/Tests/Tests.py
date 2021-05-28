@@ -11,6 +11,8 @@ class MyTestCase(unittest.TestCase):
 
     maven_matrices_folder = 'Data\\maven\\matrices'
     maven_caller_graph_folder = 'Data\\maven\\raw_caller_graphs'
+    wicket_matrices_folder = 'Data\\wicket\\matrices'
+    wicket_caller_graph_folder = 'Data\\wicket\\raw_caller_graphs'
 
     def test_get_caller_graph_metric(self):
         ei = read_json_planning_file('Data\\maven\\matrices\\3131_56cd921f')
@@ -36,13 +38,13 @@ class MyTestCase(unittest.TestCase):
         return test_2_components
 
     def test_get_caller_graph_metric_all_commits(self):
-        result = self.get_maven_commits_2_metrics()
+        result = self.get_commits_2_metrics(self.maven_matrices_folder, self.maven_caller_graph_folder)
 
         self.assertEqual(len(result['3616_912a565f'][unicode(u'org.apache.maven.settings.validation.defaultsettingsvalidatortest.testvalidatemirror')]), 1)
 
     # @unittest.skip("testing skipping")
-    def test_diagnosis_using_caller_graph_metrics(self):
-        commits_2_tests_metrics = self.get_maven_commits_2_metrics()
+    def test_maven_diagnosis_using_caller_graph_metrics(self):
+        commits_2_tests_metrics = self.get_commits_2_metrics(self.maven_matrices_folder, self.maven_caller_graph_folder)
         for commit_matrix, test_2_connected_components in commits_2_tests_metrics.items():
 
             experiment_instance = read_json_planning_file(path.join(self.maven_matrices_folder, commit_matrix))
@@ -59,21 +61,45 @@ class MyTestCase(unittest.TestCase):
             print("with metric {}:".format(commit_matrix))
             self.diagnose(experiment_instance, call_graph_components_metric)
 
+    def test_wicket_diagnosis_using_caller_graph_metrics(self):
+        commits_2_tests_metrics = self.get_commits_2_metrics(self.wicket_matrices_folder, self.wicket_caller_graph_folder)
+        temp = {}
+        # temp['5486_a79ed51e'] = commits_2_tests_metrics['5486_a79ed51e']
+        temp['5582_1fb66533'] = commits_2_tests_metrics['5582_1fb66533']
+        # for commit_matrix, test_2_connected_components in commits_2_tests_metrics.items():
+        for commit_matrix, test_2_connected_components in temp.items():
+
+            experiment_instance = read_json_planning_file(path.join(self.wicket_matrices_folder, commit_matrix))
+            print("without metric {}:".format(commit_matrix))
+            self.diagnose(experiment_instance, None)
+            original_diagnoses = experiment_instance.diagnoses
+
+            experiment_instance = read_json_planning_file(path.join(self.wicket_matrices_folder, commit_matrix))
+            context = ComponentsMetricContext(experiment_instance.initial_tests, experiment_instance.pool,
+                                              experiment_instance.get_id_bugs(), experiment_instance.error,
+                                              original_diagnoses)
+            call_graph_components_metric = ComponentsMetric.factory(ComponentsMetricType.JavaCallGraphMetric,
+                                                                    context, test_2_connected_components)
+            print("with metric {}:".format(commit_matrix))
+            self.diagnose(experiment_instance, call_graph_components_metric)
+
     def diagnose(self, experiment_instance, call_graph_components_metric):
         experiment_instance.set_comps_metric(call_graph_components_metric)
         experiment_instance.diagnose()
         print(Diagnosis_Results(experiment_instance.diagnoses, experiment_instance.initial_tests, experiment_instance.error,
                                 experiment_instance.pool, experiment_instance.get_id_bugs(), call_graph_components_metric).metrics)
 
-
-    def get_maven_commits_2_metrics(self):
+    def get_commits_2_metrics(self, matrices_folder, caller_graph_folder):
         result = {}
-        for matrix in listdir(self.maven_matrices_folder):
+        for matrix in listdir(matrices_folder):
             try:
-                ei = read_json_planning_file(path.join(self.maven_matrices_folder, matrix))
+                raw_caller_graph = path.join(caller_graph_folder, matrix.split('_')[1] + '.txt')
+                if not path.exists(raw_caller_graph):  # for wicket we didn't generate all commits graphs
+                    continue
+
+                ei = read_json_planning_file(path.join(matrices_folder, matrix))
 
                 test_2_components = self.get_inspection_2_comps(ei)
-                raw_caller_graph = path.join(self.maven_caller_graph_folder, matrix.split('_')[1] + '.txt')
                 metric_extractor = JavaCallGraphMetricExtractor(raw_caller_graph, test_2_components, ei)
                 # dictionary <test_name, list<(f1, f2)>>
                 test_2_connected_components = metric_extractor.get_connected_methods()

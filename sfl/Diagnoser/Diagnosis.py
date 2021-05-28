@@ -11,7 +11,13 @@ class Diagnosis(object):
     def __eq__(self, other):
         """Overrides the default implementation"""
         if isinstance(other, Diagnosis):
-            return self.diagnosis == other.diagnosis
+            if len(other.diagnosis) == len(self.diagnosis):
+                return self.diagnosis == other.diagnosis
+            else:
+                for d in other.diagnosis:
+                    if d not in self.diagnosis:
+                        return False
+                return True
         return False
 
     def __ne__(self, other):

@@ -198,7 +198,7 @@ class Diagnosis_Results(object):
             if comps is not None:
                 representing_comp = comps[0]
                 representing_comp_index = components.index(representing_comp)
-                sorted_comps = self.components_metric.sorted_comps_by_order
+                sorted_comps = self.components_metric.sorted_comps_by_order[test]
                 representing_first_comp_index_in_ordered_original = [i for i, tupl in enumerate(sorted_comps) if tupl[0] == representing_comp][0]
                 for comp in reversed(comps):
                     if comp not in components:
