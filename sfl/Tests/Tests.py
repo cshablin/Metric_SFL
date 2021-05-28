@@ -63,11 +63,11 @@ class MyTestCase(unittest.TestCase):
 
     def test_wicket_diagnosis_using_caller_graph_metrics(self):
         commits_2_tests_metrics = self.get_commits_2_metrics(self.wicket_matrices_folder, self.wicket_caller_graph_folder)
-        temp = {}
+        # temp = {}
         # temp['5486_a79ed51e'] = commits_2_tests_metrics['5486_a79ed51e']
-        temp['5582_1fb66533'] = commits_2_tests_metrics['5582_1fb66533']
-        # for commit_matrix, test_2_connected_components in commits_2_tests_metrics.items():
-        for commit_matrix, test_2_connected_components in temp.items():
+        # temp['5582_1fb66533'] = commits_2_tests_metrics['5582_1fb66533']
+        for commit_matrix, test_2_connected_components in commits_2_tests_metrics.items():
+        # for commit_matrix, test_2_connected_components in temp.items():
 
             experiment_instance = read_json_planning_file(path.join(self.wicket_matrices_folder, commit_matrix))
             print("without metric {}:".format(commit_matrix))

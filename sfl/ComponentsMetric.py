@@ -62,8 +62,8 @@ class JavaCallGraphComponentsMetric(ComponentsMetric):
             if close_comps_positions is not None:
                 close_comps_positions = self.order(close_comps_positions, test)
             self.test_2_ordered_closest_comps[test] = close_comps_positions
-            if close_comps_positions is not None:
-                self.combine_columns(close_comps_positions, matrix, tests_components)
+        if len(self.test_2_ordered_closest_comps) > 0:
+            self.combine_columns(self.test_2_ordered_closest_comps, matrix, tests_components)
 
             # test_index = self.context.initial_tests.index(test)
 
@@ -91,29 +91,40 @@ class JavaCallGraphComponentsMetric(ComponentsMetric):
             return None
         return list(best_pair)
 
-    def combine_columns(self, close_comps_positions, matrix, tests_components):
+    def combine_columns(self, test_2_ordered_closest_comps, matrix, tests_components):
         """
 
         :param tests_components: list<int>
-        :param close_comps_positions: list<int>
+        :param test_2_ordered_closest_comps: dict< test, list<int>>
         :param matrix: list< list<int> >
         :return:
         """
-        # first column will include all others
-        combined_position = close_comps_positions[0]
-        for test_row in matrix:
-            sum = 0
-            for comp in close_comps_positions:
-                sum += test_row[comp]
-                test_row[comp] = 0
-            if sum > 0:
-                test_row[combined_position] = 1
-        for test_components in tests_components:
-            for to_omit in close_comps_positions[1:]:
-                try:
-                    test_components.remove(to_omit)
-                except ValueError:
-                    pass
+        allready_omitted = []
+        for test, close_comps_positions in test_2_ordered_closest_comps.items():
+            if close_comps_positions is None:
+                continue
+            suggested_omits = self.can_omit_comps(close_comps_positions, allready_omitted)
+            if len(suggested_omits) == 1:
+                continue
+            elif len(suggested_omits) == 0:
+                print ("Fatal - no comp representation for test ", test)
+                continue
+            # first column will include all others
+            combined_position = close_comps_positions[0]
+            for test_row in matrix:
+                summation = 0
+                for comp in close_comps_positions:
+                    summation += test_row[comp]
+                    test_row[comp] = 0
+                if summation > 0:
+                    test_row[combined_position] = 1
+            for test_components in tests_components:
+                for to_omit in close_comps_positions[1:]:
+                    try:
+                        test_components.remove(to_omit)
+                        allready_omitted.append(to_omit)
+                    except ValueError:
+                        pass
 
     def order(self, close_comps_positions, test):
         """
@@ -139,4 +150,17 @@ class JavaCallGraphComponentsMetric(ComponentsMetric):
             else:
                 result.append(t[0])
 
+        return result
+
+    def can_omit_comps(self, close_comps_positions, already_omitted):
+        """
+
+        :param close_comps_positions: list<int>
+        :param already_omitted: list<int>
+        :return: list of possible comps to omit
+        """
+        result = close_comps_positions[:]
+        for comp in close_comps_positions:
+            if comp in already_omitted:
+                result.remove(comp)
         return result
