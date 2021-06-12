@@ -195,12 +195,12 @@ class Diagnosis_Results(object):
 
     def insert_omitted_comps(self, components):
         for test, comps in self.components_metric.test_2_ordered_closest_comps.items():
-            if comps is not None:
-                representing_comp = comps[0]
+            if comps[0] is not None:
+                representing_comp = comps[0][0]
                 representing_comp_index = components.index(representing_comp)
                 sorted_comps = self.components_metric.sorted_comps_by_order[test]
                 representing_first_comp_index_in_ordered_original = [i for i, tupl in enumerate(sorted_comps) if tupl[0] == representing_comp][0]
-                for comp in reversed(comps):
+                for comp in reversed(comps[0]):
                     if comp not in components:
                         representing_comp_index_in_ordered_original = [i for i, tupl in enumerate(sorted_comps) if tupl[0] == comp][0]
                         if representing_first_comp_index_in_ordered_original < representing_comp_index_in_ordered_original:

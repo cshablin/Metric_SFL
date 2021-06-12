@@ -69,18 +69,19 @@ class MyTestCase(unittest.TestCase):
 
     def test_wicket_diagnosis_using_caller_graph_metrics(self):
         commits_2_tests_metrics = self.get_commits_2_metrics(self.wicket_matrices_folder, self.wicket_caller_graph_folder)
+        # commits_2_tests_metrics = self.get_commits_2_metrics(self.wicket_matrices_folder, self.wicket_caller_graph_folder, '5426_fb45a781')
         # temp = {}
         # temp['5486_a79ed51e'] = commits_2_tests_metrics['5486_a79ed51e']
         # temp['5582_1fb66533'] = commits_2_tests_metrics['5582_1fb66533']
+        # temp['5426_fb45a781'] = commits_2_tests_metrics['5426_fb45a781']
         waisted_regular = []
         waisted_metric = []
         for commit_matrix, test_2_connected_components in commits_2_tests_metrics.items():
-        # for commit_matrix, test_2_connected_components in temp.items():
 
             experiment_instance = read_json_planning_file(path.join(self.wicket_matrices_folder, commit_matrix))
-            print("without metric {}:".format(commit_matrix))
             result = self.diagnose(experiment_instance, None)
             waisted_regular.append(result.metrics['wasted'])
+            print("without metric {} cost {}".format(commit_matrix, result.metrics['wasted']))
             original_diagnoses = experiment_instance.diagnoses
 
             experiment_instance = read_json_planning_file(path.join(self.wicket_matrices_folder, commit_matrix))
@@ -89,9 +90,9 @@ class MyTestCase(unittest.TestCase):
                                               original_diagnoses)
             call_graph_components_metric = ComponentsMetric.factory(ComponentsMetricType.JavaCallGraphMetric,
                                                                     context, test_2_connected_components)
-            print("with metric {}:".format(commit_matrix))
             result1 = self.diagnose(experiment_instance, call_graph_components_metric)
             waisted_metric.append(result1.metrics['wasted'])
+            print("with metric {} cost {}".format(commit_matrix, result1.metrics['wasted']))
         print ("waisted regular: ", waisted_regular)
         print ("waisted metric : ", waisted_metric)
 
@@ -103,14 +104,16 @@ class MyTestCase(unittest.TestCase):
         # print(Diagnosis_Results(experiment_instance.diagnoses, experiment_instance.initial_tests, experiment_instance.error,
         #                         experiment_instance.pool, experiment_instance.get_id_bugs(), call_graph_components_metric).metrics)
 
-    def get_commits_2_metrics(self, matrices_folder, caller_graph_folder):
+    def get_commits_2_metrics(self, matrices_folder, caller_graph_folder, commit_id = None):
         result = {}
         for matrix in listdir(matrices_folder):
             try:
                 raw_caller_graph = path.join(caller_graph_folder, matrix.split('_')[1] + '.txt')
                 if not path.exists(raw_caller_graph):  # for wicket we didn't generate all commits graphs
                     continue
-
+                if commit_id is not None:
+                    if matrix != commit_id:
+                        continue
                 ei = read_json_planning_file(path.join(matrices_folder, matrix))
 
                 test_2_components = self.get_inspection_2_comps(ei)

@@ -34,7 +34,7 @@ class ComponentsMetric(object):
         self.context = context
         self.metric_descriptor = metric_descriptor
         self.original_matrix = None
-        self.test_2_ordered_closest_comps = {}  # dict<test, list<int>>
+        self.test_2_ordered_closest_comps = {}  # dict<test, (list<int>, score)>
 
     def change(self, matrix, tests_components):
         pass
@@ -54,14 +54,15 @@ class JavaCallGraphComponentsMetric(ComponentsMetric):
         ComponentsMetric.__init__(self, regular_diagnose, metric_descriptor)
         self.sorted_comps_by_order = {}
         self.combined_position = None
+        self.actual_coned_positions = []  # list<list<position>>
 
     def change(self, matrix, tests_components):
         self.original_matrix = [x[:] for x in matrix]
         for test, close_comps in self.metric_descriptor.items():
-            close_comps_positions = self.calculate_closest_comps(close_comps)
+            close_comps_positions, close_comps_score = self.calculate_closest_comps(close_comps)
             if close_comps_positions is not None:
                 close_comps_positions = self.order(close_comps_positions, test)
-            self.test_2_ordered_closest_comps[test] = close_comps_positions
+            self.test_2_ordered_closest_comps[test] = close_comps_positions, close_comps_score
         if len(self.test_2_ordered_closest_comps) > 0:
             self.combine_columns(self.test_2_ordered_closest_comps, matrix, tests_components)
 
@@ -71,12 +72,21 @@ class JavaCallGraphComponentsMetric(ComponentsMetric):
         """
 
         :param close_comps: list<ExtractedComponents>
-        :return: list<int>
+        :return: list<int> , frequency score (for using in column combining)
         """
         connected_pairs_2_freq = {}
-        max_freq = 0
+        comp_position_2_freq = {}
+        max_pair_freq = 0
         best_pair = None
+
         for close_comp in close_comps:
+
+            for pos in close_comp.comps_positions:
+                if pos in comp_position_2_freq:
+                    comp_position_2_freq[pos] += 1
+                else:
+                    comp_position_2_freq[pos] = 1
+
             # self.comps_names = comps_names
             # self.comps_positions = comps_positions
             key = tuple(close_comp.comps_positions)
@@ -84,42 +94,126 @@ class JavaCallGraphComponentsMetric(ComponentsMetric):
                 connected_pairs_2_freq[key] += 1
             else:
                 connected_pairs_2_freq[key] = 1
-            if max_freq < connected_pairs_2_freq[key]:
-                max_freq = connected_pairs_2_freq[key]
+            if max_pair_freq < connected_pairs_2_freq[key]:
+                max_pair_freq = connected_pairs_2_freq[key]
                 best_pair = key
         if not best_pair:
-            return None
-        return list(best_pair)
+            return None, None
+        best_pair_list = list(best_pair)
+        individual_max_freq = 0
+        for pos in best_pair_list:
+            if comp_position_2_freq[pos] > individual_max_freq:
+                individual_max_freq = comp_position_2_freq[pos]
+
+        # print ("best pair {} score {}".format(best_pair_list, float(max_pair_freq + individual_max_freq) / len(close_comps)))
+        return best_pair_list, max_pair_freq + individual_max_freq
 
     def combine_columns(self, test_2_ordered_closest_comps, matrix, tests_components):
         """
 
         :param tests_components: list<int>
-        :param test_2_ordered_closest_comps: dict< test, list<int>>
+        :param test_2_ordered_closest_comps: dict< test, (list<int>, score)>
         :param matrix: list< list<int> >
         :return:
         """
         allready_omitted = []
-        for test, close_comps_positions in test_2_ordered_closest_comps.items():
-            if close_comps_positions is None:
+        common_comp_2_tests = self.calculate_common_close_comps_between_tests(test_2_ordered_closest_comps)
+
+        #  This code choose to cone more than 2 comps
+        # if len(common_comp_2_tests) > 0:
+        #     resulting_cone = []
+        #     for common_comp, tests in common_comp_2_tests.items():
+        #         for test in tests:
+        #             for comp in test_2_ordered_closest_comps[test][0]:
+        #                 if comp not in resulting_cone:
+        #                     resulting_cone.append(comp)
+        #
+        #     self.actual_coned_positions.append(resulting_cone)
+        #     # first column will include all others
+        #     combined_position = resulting_cone[0]
+        #     for test_row in matrix:
+        #         summation = 0
+        #         for comp in resulting_cone:
+        #             summation += test_row[comp]
+        #             test_row[comp] = 0
+        #         if summation > 0:
+        #             test_row[combined_position] = 1
+
+
+        #  This code choose only one best pair/list to cone within tests 'common_comp_2_tests'
+        for common_comp, tests in common_comp_2_tests.items():
+            best_score = 0
+            winner_test = None
+            for test in tests:
+                if test_2_ordered_closest_comps[test][1] > best_score:
+                    winner_test = test
+                    best_score = test_2_ordered_closest_comps[test][1]
+            comps_positions = test_2_ordered_closest_comps[winner_test][0]
+
+            # insignificant
+            normalized_score = best_score / float(len(self.metric_descriptor[winner_test]))
+            print ("best pair score {}".format(normalized_score))
+            if normalized_score < 0.05:
                 continue
-            suggested_omits = self.can_omit_comps(close_comps_positions, allready_omitted)
+
+            suggested_omits = self.can_omit_comps(comps_positions, allready_omitted)
             if len(suggested_omits) == 1:
                 continue
             elif len(suggested_omits) == 0:
-                print ("Fatal - no comp representation for test ", test)
+                print ("Fatal - no comp representation for test ")
                 continue
+            self.actual_coned_positions.append(comps_positions)
             # first column will include all others
-            combined_position = close_comps_positions[0]
+            combined_position = comps_positions[0]
             for test_row in matrix:
                 summation = 0
-                for comp in close_comps_positions:
+                for comp in comps_positions:
                     summation += test_row[comp]
                     test_row[comp] = 0
                 if summation > 0:
                     test_row[combined_position] = 1
             for test_components in tests_components:
-                for to_omit in close_comps_positions[1:]:
+                for to_omit in comps_positions[1:]:
+                    try:
+                        test_components.remove(to_omit)
+                        allready_omitted.append(to_omit)
+                    except ValueError:
+                        pass
+
+        for test, close_comps_positions in test_2_ordered_closest_comps.items():
+            to_skip = False
+            if close_comps_positions[0] is None:
+                continue
+            for close_comp in close_comps_positions[0]:
+                if close_comp in common_comp_2_tests:
+                    to_skip = True
+            if to_skip:
+                continue
+            suggested_omits = self.can_omit_comps(close_comps_positions[0], allready_omitted)
+            if len(suggested_omits) == 1:
+                continue
+            elif len(suggested_omits) == 0:
+                print ("Fatal - no comp representation for test ", test)
+                continue
+
+            # insignificant score
+            normalized_score = test_2_ordered_closest_comps[test][1] / float(len(self.metric_descriptor[test]))
+            print ("best pair score {}".format(normalized_score))
+            if normalized_score < 0.05:
+                continue
+
+            self.actual_coned_positions.append(close_comps_positions[0])
+            # first column will include all others
+            combined_position = close_comps_positions[0][0]
+            for test_row in matrix:
+                summation = 0
+                for comp in close_comps_positions[0]:
+                    summation += test_row[comp]
+                    test_row[comp] = 0
+                if summation > 0:
+                    test_row[combined_position] = 1
+            for test_components in tests_components:
+                for to_omit in close_comps_positions[0][1:]:
                     try:
                         test_components.remove(to_omit)
                         allready_omitted.append(to_omit)
@@ -163,4 +257,25 @@ class JavaCallGraphComponentsMetric(ComponentsMetric):
         for comp in close_comps_positions:
             if comp in already_omitted:
                 result.remove(comp)
+        return result
+
+    def calculate_common_close_comps_between_tests(self, test_2_ordered_closest_comps):
+        """
+        :param test_2_ordered_closest_comps: dict< test, (list<int>, score)>
+        :return dictionary common comp to it's tests: dict<comp, list<test>>
+        """
+        temp = {}
+        for test, ordered_closest_comps in test_2_ordered_closest_comps.items():
+            ordered_comps = ordered_closest_comps[0]
+            if ordered_comps is None:
+                continue
+            for comp in ordered_comps:
+                if comp not in temp:
+                    temp[comp] = [test]
+                else:
+                    temp[comp].append(test)
+        result = {}
+        for comp, tests in temp.items():
+            if len(tests) > 1:
+                result[comp] = tests
         return result
