@@ -1,3 +1,5 @@
+import json
+
 
 class ExtractedComponents(object):
     def __init__(self, comps_names, comps_positions):
@@ -79,6 +81,61 @@ class JavaCallGraphMetricExtractor(object):
             counter += 1
 
         return result + ')'
+
+    def get_extracted_components(self, comps_list):
+        resulting_positions = []
+        for comp in comps_list:
+            for position, comp_name in self.experiment_instance.components.items():
+                if comp == str(comp_name):
+                    resulting_positions.append(position)
+        return ExtractedComponents(comps_list, resulting_positions)
+
+
+class JpeekMetricExtractor(object):
+
+    def __init__(self, jpeek_res_file, test_2_components, experiment_instance):
+        """
+
+        :param java_call_graph_file: generated file using the caller graph tool
+        :param test_2_components: dictionary
+        :param experiment_instance: ExperimentInstance
+        :param jpeek_data: json dictionary where keys: class nams, value: dictionary of methods in class and LCOM distance
+        """
+        self._call_graph_file = jpeek_res_file
+        self.test_2_interest_methods = test_2_components  # dict<test, dict<method_lowercase, parameters>>
+        self.experiment_instance = experiment_instance
+        with open(jpeek_res_file) as json_file:
+            self.jpeek_data = json.load(json_file)
+        print('jpeekMetricExtractor initilized')
+
+    def get_connected_methods(self):
+        """
+        :return: dictionary <test_name, list<ExtractedComponents>>
+        """
+        # initialize result
+        result = {}
+
+        for test, method_2_params in self.test_2_interest_methods.items():
+            result[test] = []
+            for m in method_2_params:
+                m = m.lower()
+                C = self.get_class_of_method(m)
+                class_methods = set(self.jpeek_data[C]["methods"])
+                test_methods = set(method_2_params)
+                mutual_methods = list(class_methods & test_methods - set(m))
+                if self.jpeek_data[C]["distance"]>0.3:
+                    for mutual_method in mutual_methods:
+                        ec = self.get_extracted_components([m, mutual_method])
+                        result[test].append((ec,self.jpeek_data[C]["distance"]))
+                        # result[test].append(ec)
+        return result
+
+
+    def get_class_of_method(self, method_name):
+        for class_name, class_data in self.jpeek_data.items():
+            if method_name in class_data["methods"]:
+                return class_name
+        return ''
 
     def get_extracted_components(self, comps_list):
         resulting_positions = []

@@ -140,3 +140,5 @@ fabric.properties
 
 ## Directory-based project format:
 .idea/
+
+sfl/Tests/test_things.py
