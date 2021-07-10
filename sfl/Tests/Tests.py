@@ -37,10 +37,10 @@ class MyTestCase(unittest.TestCase):
                 test_2_components[test] = methods
         return test_2_components
 
-    def test_get_caller_graph_metric_all_commits(self):
-        result = self.get_commits_2_metrics(self.maven_matrices_folder, self.maven_caller_graph_folder)
-
-        self.assertEqual(len(result['3616_912a565f'][unicode(u'org.apache.maven.settings.validation.defaultsettingsvalidatortest.testvalidatemirror')]), 1)
+    # def test_get_caller_graph_metric_all_commits(self):
+    #     result = self.get_commits_2_metrics(self.maven_matrices_folder, self.maven_caller_graph_folder)
+    #
+    #     self.assertEqual(len(result['3616_912a565f'][unicode(u'org.apache.maven.settings.validation.defaultsettingsvalidatortest.testvalidatemirror')]), 1)
 
     # @unittest.skip("testing skipping")
     def test_maven_diagnosis_using_caller_graph_metrics(self):

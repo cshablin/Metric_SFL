@@ -120,14 +120,15 @@ class JpeekMetricExtractor(object):
             for m in method_2_params:
                 m = m.lower()
                 C = self.get_class_of_method(m)
-                class_methods = set(self.jpeek_data[C]["methods"])
-                test_methods = set(method_2_params)
-                mutual_methods = list(class_methods & test_methods - set(m))
-                if self.jpeek_data[C]["distance"]>0.3:
-                    for mutual_method in mutual_methods:
-                        ec = self.get_extracted_components([m, mutual_method])
-                        result[test].append((ec,self.jpeek_data[C]["distance"]))
-                        # result[test].append(ec)
+                if C:
+                    class_methods = set(self.jpeek_data[C]["methods"])
+                    test_methods = set(method_2_params)
+                    mutual_methods = list(class_methods & test_methods - set(m))
+                    if self.jpeek_data[C]["distance"]>0.3:
+                        for mutual_method in mutual_methods:
+                            ec = self.get_extracted_components([m, mutual_method])
+                            result[test].append((ec,self.jpeek_data[C]["distance"]))
+                            # result[test].append(ec)
         return result
 
 

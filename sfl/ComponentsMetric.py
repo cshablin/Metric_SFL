@@ -304,10 +304,11 @@ class JpeekDistanceComponentsMetric(ComponentsMetric):
         print('change JpeekDistanceComponentsMetric')
         self.original_matrix = [x[:] for x in matrix]
         for test, close_comps in self.metric_descriptor_with_distance.items(): # to change the input to new_metric_descriptor
-            close_comps_positions, close_comps_score = self.calculate_closest_comps(close_comps)
-            if close_comps_positions is not None:
-                close_comps_positions = self.order(close_comps_positions, test)
-            self.test_2_ordered_closest_comps[test] = close_comps_positions, close_comps_score
+            if close_comps:
+                close_comps_positions, close_comps_score = self.calculate_closest_comps(close_comps)
+                if close_comps_positions is not None:
+                    close_comps_positions = self.order(close_comps_positions, test)
+                self.test_2_ordered_closest_comps[test] = close_comps_positions, close_comps_score
         if len(self.test_2_ordered_closest_comps) > 0:
             self.combine_columns(self.test_2_ordered_closest_comps, matrix, tests_components)
 
