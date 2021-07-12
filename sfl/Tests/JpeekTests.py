@@ -14,15 +14,7 @@ class MyTestCase(unittest.TestCase):
     wicket_matrices_folder = 'Data\\wicket\\matrices'
     wicket_caller_graph_folder = 'Data\\wicket\\jpeek_LCOM_extracted_weighted_results'
 
-    def test_get_caller_graph_metric(self):
-        ei = read_json_planning_file('Data\\maven\\matrices\\3131_56cd921f')
-        raw_caller_graph = 'Data\\maven\\\jpeek_LCOM_extracted_weighted_results\\56cd921f.json'
-        print('ok')
-        test_2_components = self.get_inspection_2_comps(ei)
 
-        metric_extractor = JpeekMetricExtractor(raw_caller_graph, test_2_components, ei)
-        test_2_connected_components = metric_extractor.get_connected_methods() # get connected methods need to return conneceted methods in each tets which are relevant to that test  -the majority of the work!
-        1
     def get_inspection_2_comps(self, ei):  # return failed test with thier components
         test_2_components = {}  # dict<test, dict<method_lowercase, parameters>>
         for test, is_failed in ei.error.items():
@@ -37,14 +29,10 @@ class MyTestCase(unittest.TestCase):
                 test_2_components[test] = methods
         return test_2_components
 
-    def test_get_caller_graph_metric_all_commits(self):
-        result = self.get_commits_2_metrics(self.maven_matrices_folder, self.maven_caller_graph_folder)
 
-        self.assertEqual(len(result['3616_912a565f'][unicode(u'org.apache.maven.settings.validation.defaultsettingsvalidatortest.testvalidatemirror')]), 1)
-
-    @unittest.skip("testing skipping")
-    def test_maven_diagnosis_using_caller_graph_metrics(self):
-        print('    def test_maven_diagnosis_using_caller_graph')
+    # @unittest.skip("testing skipping")
+    def test_maven_diagnosis_using_LCOM_metrics(self):
+        print('start test_maven_diagnosis_LCOM')
         commits_2_tests_metrics = self.get_commits_2_metrics(self.maven_matrices_folder, self.maven_caller_graph_folder)
         waisted_regular = []
         waisted_metric = []
@@ -68,13 +56,9 @@ class MyTestCase(unittest.TestCase):
         print ("waisted regular: ", waisted_regular)
         print ("waisted metric : ", waisted_metric)
 
-    def test_wicket_diagnosis_using_caller_graph_metrics(self):
+    def test_wicket_diagnosis_using_LCOM_metrics(self):
+        print('start test_wicket_diagnosis_LCOM')
         commits_2_tests_metrics = self.get_commits_2_metrics(self.wicket_matrices_folder, self.wicket_caller_graph_folder)
-        # commits_2_tests_metrics = self.get_commits_2_metrics(self.wicket_matrices_folder, self.wicket_caller_graph_folder, '5426_fb45a781')
-        # temp = {}
-        # temp['5486_a79ed51e'] = commits_2_tests_metrics['5486_a79ed51e']
-        # temp['5582_1fb66533'] = commits_2_tests_metrics['5582_1fb66533']
-        # temp['5426_fb45a781'] = commits_2_tests_metrics['5426_fb45a781']
         waisted_regular = []
         waisted_metric = []
         for commit_matrix, test_2_connected_components in commits_2_tests_metrics.items():
@@ -90,7 +74,7 @@ class MyTestCase(unittest.TestCase):
                                                   experiment_instance.get_id_bugs(), experiment_instance.error,
                                                   original_diagnoses)
                 call_graph_components_metric = ComponentsMetric.factory(ComponentsMetricType.JpeekMetric,
-                                                              v             context, test_2_connected_components)
+                                                                         context, test_2_connected_components)
                 result1 = self.diagnose(experiment_instance, call_graph_components_metric)
                 waisted_metric.append(result1.metrics['wasted'])
                 print("with metric {} cost {}".format(commit_matrix, result1.metrics['wasted']))
